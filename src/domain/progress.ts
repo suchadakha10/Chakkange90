@@ -1,4 +1,5 @@
 import type { ProofEntry } from "./types";
+import { getElapsedChallengeDay } from "./challengeDates";
 
 export function getCompletedDays(proofs: ProofEntry[]): number {
   return new Set(proofs.map((proof) => proof.day)).size;
@@ -18,6 +19,10 @@ export function getFirstIncompleteDay(proofs: ProofEntry[]): number {
     if (!doneDays.has(day)) return day;
   }
   return 90;
+}
+
+export function getCurrentChallengeDay(proofs: ProofEntry[], startDate: string, today: Date = new Date()): number {
+  return Math.min(getFirstIncompleteDay(proofs), getElapsedChallengeDay(startDate, today));
 }
 
 export function getStreak(proofs: ProofEntry[], currentDay: number): number {

@@ -7,7 +7,7 @@ import { TodayCommandCenter } from "./components/TodayCommandCenter";
 import { WeeklyReview } from "./components/WeeklyReview";
 import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
-import { getFirstIncompleteDay } from "./domain/progress";
+import { getCurrentChallengeDay } from "./domain/progress";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
 import { deleteProof, isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "./sync/proofSync";
 
@@ -32,7 +32,7 @@ export default function App() {
         setState((currentState) => ({
           ...currentState,
           proofs: replaceProofsFromRemote(remoteProofs),
-          currentDay: getFirstIncompleteDay(remoteProofs),
+          currentDay: getCurrentChallengeDay(remoteProofs, currentState.startDate),
           proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
         }));
       })
@@ -50,11 +50,14 @@ export default function App() {
   const tomorrowMission = useMemo(() => missions.find((day) => day.day === state.currentDay + 1), [missions, state.currentDay]);
 
   async function handleDeleteProof(proofId: string) {
-    setState((currentState) => ({
-      ...currentState,
-      proofs: currentState.proofs.filter((proof) => proof.id !== proofId),
-      currentDay: getFirstIncompleteDay(currentState.proofs.filter((proof) => proof.id !== proofId)),
-    }));
+    setState((currentState) => {
+      const nextProofs = currentState.proofs.filter((proof) => proof.id !== proofId);
+      return {
+        ...currentState,
+        proofs: nextProofs,
+        currentDay: getCurrentChallengeDay(nextProofs, currentState.startDate),
+      };
+    });
 
     if (!isProofSyncConfigured(state.proofSync)) return;
 

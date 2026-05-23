@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, Flame, Send } from "lucide-react";
 import { useState } from "react";
 import { formatChallengeDate } from "../domain/challengeDates";
-import { getEmergencyCountThisWeek, getFirstIncompleteDay, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
+import { getCurrentChallengeDay, getEmergencyCountThisWeek, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
 import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
 import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
@@ -56,7 +56,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
     };
 
     const nextProofs = [proof, ...state.proofs];
-    const nextState = { ...state, proofs: nextProofs, currentDay: getFirstIncompleteDay(nextProofs) };
+    const nextState = { ...state, proofs: nextProofs, currentDay: getCurrentChallengeDay(nextProofs, state.startDate) };
     onChange(nextState);
     setTitle("");
     setNotes("");

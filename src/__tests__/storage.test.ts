@@ -26,7 +26,7 @@ describe("challengeStore", () => {
 
   it("saves and loads state", () => {
     const state = createDefaultState();
-    saveChallengeState({ ...state, currentDay: 5, proofs: [proof(1), proof(2), proof(3), proof(4)] });
+    saveChallengeState({ ...state, startDate: "2026-05-19", currentDay: 5, proofs: [proof(1), proof(2), proof(3), proof(4)] });
     expect(loadChallengeState().currentDay).toBe(5);
   });
 

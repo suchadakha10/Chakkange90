@@ -1,5 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { getCompletedDays, getCompletionPercent, getFirstIncompleteDay, getMotionDrillsThisWeek, getRemainingDays, getStreak, shouldWarnMotionAvoidance } from "../domain/progress";
+import {
+  getCompletedDays,
+  getCompletionPercent,
+  getCurrentChallengeDay,
+  getFirstIncompleteDay,
+  getMotionDrillsThisWeek,
+  getRemainingDays,
+  getStreak,
+  shouldWarnMotionAvoidance,
+} from "../domain/progress";
 import type { ProofEntry } from "../domain/types";
 
 const proof = (day: number, proofType: ProofEntry["proofType"] = "post"): ProofEntry => ({
@@ -29,6 +38,12 @@ describe("progress rules", () => {
     expect(getFirstIncompleteDay([])).toBe(1);
     expect(getFirstIncompleteDay([proof(1), proof(3)])).toBe(2);
     expect(getFirstIncompleteDay(Array.from({ length: 90 }, (_, index) => proof(index + 1)))).toBe(90);
+  });
+
+  it("does not unlock a future day just because today's proof is done", () => {
+    expect(getCurrentChallengeDay([proof(1)], "2026-05-23", new Date("2026-05-23T12:00:00"))).toBe(1);
+    expect(getCurrentChallengeDay([proof(1)], "2026-05-23", new Date("2026-05-24T12:00:00"))).toBe(2);
+    expect(getCurrentChallengeDay([], "2026-05-23", new Date("2026-05-24T12:00:00"))).toBe(1);
   });
 
   it("calculates streak ending at the current day", () => {
