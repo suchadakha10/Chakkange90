@@ -8,7 +8,7 @@ import { WeeklyReview } from "./components/WeeklyReview";
 import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
-import { deleteProof, isProofSyncConfigured, mergeProofs, pullProofs } from "./sync/proofSync";
+import { deleteProof, isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "./sync/proofSync";
 
 const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
@@ -30,7 +30,7 @@ export default function App() {
         if (isCancelled) return;
         setState((currentState) => ({
           ...currentState,
-          proofs: mergeProofs(currentState.proofs, remoteProofs),
+          proofs: replaceProofsFromRemote(remoteProofs),
           proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
         }));
       })

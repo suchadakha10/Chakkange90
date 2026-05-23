@@ -23,6 +23,14 @@ export function mergeProofs(localProofs: ProofEntry[], remoteProofs: ProofEntry[
   return Array.from(byId.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
 }
 
+export function replaceProofsFromRemote(remoteProofs: ProofEntry[]): ProofEntry[] {
+  const byId = new Map<string, ProofEntry>();
+  remoteProofs.forEach((proof) => {
+    byId.set(proof.id, proof);
+  });
+  return Array.from(byId.values()).sort((a, b) => b.createdAt.localeCompare(a.createdAt));
+}
+
 export async function pullProofs(config: ProofSyncConfig, fetcher: FetchLike = fetch): Promise<ProofEntry[]> {
   const url = `${cleanScriptUrl(config.scriptUrl)}?action=proofs&secret=${encodeURIComponent(config.secret)}`;
   const response = await fetcher(url);

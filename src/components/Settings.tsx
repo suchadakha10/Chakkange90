@@ -1,7 +1,7 @@
 import { useState } from "react";
 import type { ChallengeState } from "../domain/types";
 import { resetChallengeState } from "../storage/challengeStore";
-import { isProofSyncConfigured, mergeProofs, pullProofs } from "../sync/proofSync";
+import { isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "../sync/proofSync";
 
 export function Settings({ state, onChange }: { state: ChallengeState; onChange: (state: ChallengeState) => void }) {
   const [syncMessage, setSyncMessage] = useState("");
@@ -18,7 +18,7 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
       const remoteProofs = await pullProofs(state.proofSync);
       const nextState = {
         ...state,
-        proofs: mergeProofs(state.proofs, remoteProofs),
+        proofs: replaceProofsFromRemote(remoteProofs),
         proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() },
       };
       onChange(nextState);

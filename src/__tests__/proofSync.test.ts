@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { deleteProof, mergeProofs, pullProofs, pushProof } from "../sync/proofSync";
+import { deleteProof, mergeProofs, pullProofs, pushProof, replaceProofsFromRemote } from "../sync/proofSync";
 import type { ProofEntry } from "../domain/types";
 
 const proof = (id: string, day: number): ProofEntry => ({
@@ -15,6 +15,10 @@ const proof = (id: string, day: number): ProofEntry => ({
 describe("proofSync", () => {
   it("merges remote and local proofs without duplicating ids", () => {
     expect(mergeProofs([proof("a", 1), proof("b", 2)], [proof("b", 2), proof("c", 3)]).map((entry) => entry.id)).toEqual(["c", "b", "a"]);
+  });
+
+  it("replaces local proofs with remote proofs so deleted sheet rows disappear on every device", () => {
+    expect(replaceProofsFromRemote([proof("b", 2), proof("c", 3)]).map((entry) => entry.id)).toEqual(["c", "b"]);
   });
 
   it("pulls proofs from Apps Script endpoint", async () => {
