@@ -82,7 +82,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
     <div className="page-stack">
       <header className="page-header">
         <div>
-          <p className="eyebrow dark">
+          <p className="eyebrow dark today-status">
             วันนี้ · วันที่ {mission.day} / สัปดาห์ {mission.week}
           </p>
           <h2>{mission.title}</h2>
@@ -107,7 +107,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
         </div>
       )}
 
-      <section className="panel">
+      <section className="panel today-mission-panel">
         <div className="panel-heading">
           <h3>ภารกิจวันนี้</h3>
           {dayDone && (
