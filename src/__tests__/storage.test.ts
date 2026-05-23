@@ -9,6 +9,7 @@ describe("challengeStore", () => {
   it("creates default state with style kit and day 1", () => {
     const state = createDefaultState();
     expect(state.currentDay).toBe(1);
+    expect(state.proofSync).toEqual({ scriptUrl: "", secret: "" });
     expect(state.styleKit.palette).toEqual(["#ffdd00", "#00c2ff", "#ff4fa3", "#111111", "#f7f7f2"]);
   });
 

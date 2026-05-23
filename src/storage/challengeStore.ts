@@ -9,6 +9,10 @@ export function createDefaultState(): ChallengeState {
     proofs: [],
     weeklyReviews: [],
     emergencyLimitPerWeek: 2,
+    proofSync: {
+      scriptUrl: "",
+      secret: "",
+    },
     styleKit: {
       palette: ["#ffdd00", "#00c2ff", "#ff4fa3", "#111111", "#f7f7f2"],
       subtitleRule: "ซับไม่เกิน 2 บรรทัด ไฮไลต์เฉพาะคำสำคัญ",
@@ -18,13 +22,20 @@ export function createDefaultState(): ChallengeState {
 }
 
 export function loadChallengeState(): ChallengeState {
+  const defaults = createDefaultState();
   const raw = localStorage.getItem(STORAGE_KEY);
-  if (!raw) return createDefaultState();
+  if (!raw) return defaults;
 
   try {
-    return { ...createDefaultState(), ...JSON.parse(raw) };
+    const parsed = JSON.parse(raw) as Partial<ChallengeState>;
+    return {
+      ...defaults,
+      ...parsed,
+      proofSync: { ...defaults.proofSync, ...parsed.proofSync },
+      styleKit: { ...defaults.styleKit, ...parsed.styleKit },
+    };
   } catch {
-    return createDefaultState();
+    return defaults;
   }
 }
 

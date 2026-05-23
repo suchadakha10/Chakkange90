@@ -8,6 +8,7 @@ import { WeeklyReview } from "./components/WeeklyReview";
 import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
+import { isProofSyncConfigured, mergeProofs, pullProofs } from "./sync/proofSync";
 
 const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
@@ -19,6 +20,28 @@ export default function App() {
   useEffect(() => {
     saveChallengeState(state);
   }, [state]);
+
+  useEffect(() => {
+    if (!isProofSyncConfigured(state.proofSync)) return;
+
+    let isCancelled = false;
+    pullProofs(state.proofSync)
+      .then((remoteProofs) => {
+        if (isCancelled) return;
+        setState((currentState) => ({
+          ...currentState,
+          proofs: mergeProofs(currentState.proofs, remoteProofs),
+          proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
+        }));
+      })
+      .catch(() => {
+        // Keep local proof data usable even when the sheet is temporarily unreachable.
+      });
+
+    return () => {
+      isCancelled = true;
+    };
+  }, [state.proofSync.scriptUrl, state.proofSync.secret]);
 
   const missions = useMemo(() => seedPlan.weeks.flatMap((week) => week.days), []);
   const todayMission = useMemo(() => missions.find((day) => day.day === state.currentDay) ?? missions[0], [missions, state.currentDay]);

@@ -2,6 +2,7 @@ import { AlertTriangle, CheckCircle2, Flame, Send } from "lucide-react";
 import { useState } from "react";
 import { getEmergencyCountThisWeek, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
 import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
+import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
 interface Props {
   mission: DailyMission;
@@ -24,6 +25,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const [notes, setNotes] = useState("");
   const [url, setUrl] = useState("");
   const [reason, setReason] = useState("");
+  const [syncMessage, setSyncMessage] = useState("");
   const week = getWeekForDay(state.currentDay);
   const streak = getStreak(state.proofs, state.currentDay);
   const emergencyCount = getEmergencyCountThisWeek(state.proofs, week);
@@ -33,7 +35,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const dayDone = state.proofs.some((proof) => proof.day === mission.day);
   const canSubmit = title.trim().length > 0 && notes.trim().length > 0;
 
-  function submitProof() {
+  async function submitProof() {
     if (!canSubmit) return;
 
     const proof: ProofEntry = {
@@ -49,11 +51,26 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
       downgradeReason: level === "full" ? undefined : reason.trim() || "Time constraint",
     };
 
-    onChange({ ...state, proofs: [proof, ...state.proofs] });
+    const nextState = { ...state, proofs: [proof, ...state.proofs] };
+    onChange(nextState);
     setTitle("");
     setNotes("");
     setUrl("");
     setReason("");
+
+    if (!isProofSyncConfigured(state.proofSync)) {
+      setSyncMessage("");
+      return;
+    }
+
+    try {
+      setSyncMessage("กำลังส่ง proof ไป Google Sheet...");
+      await pushProof(state.proofSync, proof);
+      onChange({ ...nextState, proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() } });
+      setSyncMessage("ส่ง proof ไป Google Sheet แล้ว");
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? `${error.message} แต่ proof ถูกเก็บในเครื่องแล้ว` : "ส่ง Google Sheet ไม่สำเร็จ แต่ proof ถูกเก็บในเครื่องแล้ว");
+    }
   }
 
   function goToNextDay() {
@@ -156,6 +173,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
             ไปวันถัดไป
           </button>
         </div>
+        {syncMessage && <p className="muted">{syncMessage}</p>}
       </section>
 
       <section className="panel compact">

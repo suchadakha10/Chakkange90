@@ -56,6 +56,11 @@ export interface ChallengeState {
   proofs: ProofEntry[];
   weeklyReviews: WeeklyReviewEntry[];
   emergencyLimitPerWeek: number;
+  proofSync: {
+    scriptUrl: string;
+    secret: string;
+    lastSyncedAt?: string;
+  };
   styleKit: {
     palette: string[];
     subtitleRule: string;

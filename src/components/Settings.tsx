@@ -1,7 +1,33 @@
+import { useState } from "react";
 import type { ChallengeState } from "../domain/types";
 import { resetChallengeState } from "../storage/challengeStore";
+import { isProofSyncConfigured, mergeProofs, pullProofs } from "../sync/proofSync";
 
 export function Settings({ state, onChange }: { state: ChallengeState; onChange: (state: ChallengeState) => void }) {
+  const [syncMessage, setSyncMessage] = useState("");
+  const syncConfigured = isProofSyncConfigured(state.proofSync);
+
+  async function syncProofsNow() {
+    if (!syncConfigured) {
+      setSyncMessage("ใส่ Google Script URL และ Secret Key ก่อน");
+      return;
+    }
+
+    try {
+      setSyncMessage("กำลังโหลด proof จาก Google Sheet...");
+      const remoteProofs = await pullProofs(state.proofSync);
+      const nextState = {
+        ...state,
+        proofs: mergeProofs(state.proofs, remoteProofs),
+        proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() },
+      };
+      onChange(nextState);
+      setSyncMessage(`sync แล้ว: พบ proof ทั้งหมด ${nextState.proofs.length} รายการ`);
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? error.message : "sync ไม่สำเร็จ");
+    }
+  }
+
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -14,6 +40,28 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
         <h3>Challenge</h3>
         <p>วันที่เริ่ม: {state.startDate}</p>
         <p>โควตา Emergency: {state.emergencyLimitPerWeek} ครั้ง / สัปดาห์</p>
+      </section>
+      <section className="panel">
+        <h3>Google Sheet Proof Sync</h3>
+        <p className="muted">ใช้ Google Apps Script เป็นตัวกลาง ข้อมูล proof จะ sync ข้ามมือถือและคอมได้</p>
+        <input
+          value={state.proofSync.scriptUrl}
+          onChange={(event) => onChange({ ...state, proofSync: { ...state.proofSync, scriptUrl: event.target.value } })}
+          placeholder="Google Apps Script Web App URL"
+        />
+        <input
+          value={state.proofSync.secret}
+          onChange={(event) => onChange({ ...state, proofSync: { ...state.proofSync, secret: event.target.value } })}
+          placeholder="Secret Key"
+          type="password"
+        />
+        <div className="action-row">
+          <button className="primary-action" disabled={!syncConfigured} onClick={syncProofsNow} type="button">
+            โหลด proof จาก Google Sheet
+          </button>
+        </div>
+        {state.proofSync.lastSyncedAt && <p className="muted">sync ล่าสุด: {new Date(state.proofSync.lastSyncedAt).toLocaleString("th-TH")}</p>}
+        {syncMessage && <p className="muted">{syncMessage}</p>}
       </section>
       <section className="panel">
         <h3>Pop Art Minimalist Style Kit</h3>
