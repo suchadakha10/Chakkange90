@@ -44,7 +44,7 @@ export function PlanView({ plan, proofs, currentDay, startDate }: Props) {
         <div className="progress-track" aria-label={`ความคืบหน้า ${percent}%`}>
           <div className="progress-fill" style={{ width: `${percent}%` }} />
         </div>
-        <p className="muted">ถ้าไม่มี proof วันนั้นจะยังไม่นับว่าสำเร็จ แม้จะเปิดดูตารางแล้วก็ตาม</p>
+        <p className="muted">ถ้าไม่มี proof วันนั้นจะยังไม่นับว่าสำเร็จ แม้จะเปิดดูตารางแล้วก็ตาม แผนอนาคตปรับได้หลังรีวิวรายสัปดาห์ แต่วันนี้ต้องส่งงานจริง</p>
       </section>
 
       <div className="week-grid">
@@ -67,7 +67,10 @@ export function PlanView({ plan, proofs, currentDay, startDate }: Props) {
                     {doneDays.has(day.day) ? <CheckCircle2 size={18} /> : day.day === currentDay ? <Clock3 size={18} /> : <Circle size={18} />}
                   </div>
                   <small>{formatChallengeDate(startDate, day.day)}</small>
-                  <span>{day.title}</span>
+                  <span className="day-title">{day.title}</span>
+                  <span className="day-work">
+                    <strong>งาน:</strong> {day.full}
+                  </span>
                   {day.requiresMotion && <em>Motion</em>}
                 </div>
               ))}

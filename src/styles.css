@@ -432,10 +432,26 @@ textarea::placeholder {
   color: #00c2ff;
 }
 
-.day-cell span {
+.day-title,
+.day-work {
   color: #d8d8e2;
   font-size: 13px;
   line-height: 1.35;
+}
+
+.day-title {
+  font-weight: 800;
+}
+
+.day-work {
+  display: -webkit-box;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.day-work strong {
+  color: #ffdd00;
 }
 
 .day-cell small {

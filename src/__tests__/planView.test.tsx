@@ -1,6 +1,6 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
-import { describe, expect, it } from "vitest";
+import { cleanup, render, screen } from "@testing-library/react";
+import { afterEach, describe, expect, it } from "vitest";
 import { PlanView } from "../components/PlanView";
 import { seedPlan } from "../domain/seedPlan";
 import type { ProofEntry } from "../domain/types";
@@ -14,6 +14,8 @@ const proof = (day: number): ProofEntry => ({
   notes: "done",
   createdAt: "2026-05-23T00:00:00.000Z",
 });
+
+afterEach(() => cleanup());
 
 describe("PlanView", () => {
   it("shows completed and remaining days from submitted proofs", () => {
@@ -30,5 +32,12 @@ describe("PlanView", () => {
 
     expect(screen.getByLabelText("วันที่ 1 ยังไม่เสร็จ")).toHaveTextContent("23 พ.ค. 2026");
     expect(screen.getByLabelText("วันที่ 2 ยังไม่เสร็จ")).toHaveTextContent("24 พ.ค. 2026");
+  });
+
+  it("shows a one-line work detail for each day", () => {
+    render(<PlanView plan={seedPlan} proofs={[]} currentDay={1} startDate="2026-05-23" />);
+
+    expect(screen.getByLabelText("วันที่ 1 ยังไม่เสร็จ")).toHaveTextContent("งาน:");
+    expect(screen.getByLabelText("วันที่ 1 ยังไม่เสร็จ")).toHaveTextContent("ตัดคลิป 30-45 วินาที");
   });
 });
