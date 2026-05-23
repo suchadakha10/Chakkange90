@@ -20,10 +20,9 @@ export default function App() {
     saveChallengeState(state);
   }, [state]);
 
-  const todayMission = useMemo(
-    () => seedPlan.weeks.flatMap((week) => week.days).find((day) => day.day === state.currentDay) ?? seedPlan.weeks[0].days[0],
-    [state.currentDay],
-  );
+  const missions = useMemo(() => seedPlan.weeks.flatMap((week) => week.days), []);
+  const todayMission = useMemo(() => missions.find((day) => day.day === state.currentDay) ?? missions[0], [missions, state.currentDay]);
+  const tomorrowMission = useMemo(() => missions.find((day) => day.day === state.currentDay + 1), [missions, state.currentDay]);
 
   return (
     <main className="app-shell">
@@ -40,7 +39,7 @@ export default function App() {
         </nav>
       </aside>
       <section className="workspace">
-        {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} state={state} onChange={setState} />}
+        {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} tomorrowMission={tomorrowMission} state={state} onChange={setState} />}
         {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
         {activeTab === "Motion" && <MotionTrack state={state} />}
         {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} />}

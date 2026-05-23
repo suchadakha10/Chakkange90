@@ -5,6 +5,7 @@ import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../dom
 
 interface Props {
   mission: DailyMission;
+  tomorrowMission?: DailyMission;
   state: ChallengeState;
   onChange: (state: ChallengeState) => void;
 }
@@ -17,7 +18,7 @@ function proofTypeFor(mission: DailyMission, level: TaskLevel): ProofEntry["proo
   return "draft";
 }
 
-export function TodayCommandCenter({ mission, state, onChange }: Props) {
+export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }: Props) {
   const [level, setLevel] = useState<TaskLevel>("full");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -111,6 +112,35 @@ export function TodayCommandCenter({ mission, state, onChange }: Props) {
         </div>
         <p className="selected-task">{selectedTask}</p>
       </section>
+
+      {tomorrowMission && (
+        <section className="panel tomorrow-panel">
+          <div className="panel-heading">
+            <div>
+              <p className="eyebrow dark">พรุ่งนี้</p>
+              <h3>
+                วันที่ {tomorrowMission.day}: {tomorrowMission.title}
+              </h3>
+            </div>
+            {tomorrowMission.requiresMotion && <span className="tag">Motion</span>}
+          </div>
+          <p>{tomorrowMission.focus}</p>
+          <div className="tomorrow-grid">
+            <div>
+              <strong>FULL</strong>
+              <span>{tomorrowMission.full}</span>
+            </div>
+            <div>
+              <strong>MINIMUM</strong>
+              <span>{tomorrowMission.minimum}</span>
+            </div>
+            <div>
+              <strong>EMERGENCY</strong>
+              <span>{tomorrowMission.emergency}</span>
+            </div>
+          </div>
+        </section>
+      )}
 
       <section className="panel">
         <h3>ส่งหลักฐาน</h3>
