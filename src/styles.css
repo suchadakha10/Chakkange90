@@ -100,6 +100,13 @@ textarea {
   margin: 0;
 }
 
+.challenge-date {
+  color: #ffdd00;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 0 0 8px;
+}
+
 .dark {
   color: #ffdd00;
 }
@@ -215,6 +222,26 @@ textarea {
 
 .tomorrow-panel {
   border-color: #00c2ff;
+}
+
+.detail-toggle {
+  align-items: center;
+  background: #101016;
+  border: 1px solid #30303c;
+  border-radius: 8px;
+  color: #f7f7f2;
+  cursor: pointer;
+  display: inline-flex;
+  font-weight: 800;
+  gap: 8px;
+  margin-top: 4px;
+  min-height: 40px;
+  padding: 9px 12px;
+}
+
+.detail-toggle:hover {
+  border-color: #00c2ff;
+  color: #00c2ff;
 }
 
 .tomorrow-grid {

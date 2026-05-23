@@ -1,5 +1,6 @@
-import { AlertTriangle, CheckCircle2, Flame, Send } from "lucide-react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, Flame, Send } from "lucide-react";
 import { useState } from "react";
+import { formatChallengeDate } from "../domain/challengeDates";
 import { getEmergencyCountThisWeek, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
 import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
 import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
@@ -26,6 +27,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const [url, setUrl] = useState("");
   const [reason, setReason] = useState("");
   const [syncMessage, setSyncMessage] = useState("");
+  const [tomorrowExpanded, setTomorrowExpanded] = useState(false);
   const week = getWeekForDay(state.currentDay);
   const streak = getStreak(state.proofs, state.currentDay);
   const emergencyCount = getEmergencyCountThisWeek(state.proofs, week);
@@ -34,6 +36,8 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const selectedTask = mission[level];
   const dayDone = state.proofs.some((proof) => proof.day === mission.day);
   const canSubmit = title.trim().length > 0 && notes.trim().length > 0;
+  const todayDate = formatChallengeDate(state.startDate, mission.day);
+  const tomorrowDate = tomorrowMission ? formatChallengeDate(state.startDate, tomorrowMission.day) : "";
 
   async function submitProof() {
     if (!canSubmit) return;
@@ -82,9 +86,10 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
       <header className="page-header">
         <div>
           <p className="eyebrow dark">
-            วันที่ {mission.day} / สัปดาห์ {mission.week}
+            วันนี้ · วันที่ {mission.day} / สัปดาห์ {mission.week}
           </p>
           <h2>{mission.title}</h2>
+          <p className="challenge-date">{todayDate}</p>
           <p>{mission.focus}</p>
         </div>
         <div className="metric-row">
@@ -138,24 +143,31 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
               <h3>
                 วันที่ {tomorrowMission.day}: {tomorrowMission.title}
               </h3>
+              <p className="challenge-date">{tomorrowDate}</p>
             </div>
             {tomorrowMission.requiresMotion && <span className="tag">Motion</span>}
           </div>
           <p>{tomorrowMission.focus}</p>
-          <div className="tomorrow-grid">
-            <div>
-              <strong>FULL</strong>
-              <span>{tomorrowMission.full}</span>
+          <button className="detail-toggle" onClick={() => setTomorrowExpanded((isExpanded) => !isExpanded)} type="button">
+            {tomorrowExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+            {tomorrowExpanded ? "ย่อรายละเอียดงานพรุ่งนี้" : "ขยายรายละเอียดงานพรุ่งนี้"}
+          </button>
+          {tomorrowExpanded && (
+            <div className="tomorrow-grid">
+              <div>
+                <strong>FULL</strong>
+                <span>{tomorrowMission.full}</span>
+              </div>
+              <div>
+                <strong>MINIMUM</strong>
+                <span>{tomorrowMission.minimum}</span>
+              </div>
+              <div>
+                <strong>EMERGENCY</strong>
+                <span>{tomorrowMission.emergency}</span>
+              </div>
             </div>
-            <div>
-              <strong>MINIMUM</strong>
-              <span>{tomorrowMission.minimum}</span>
-            </div>
-            <div>
-              <strong>EMERGENCY</strong>
-              <span>{tomorrowMission.emergency}</span>
-            </div>
-          </div>
+          )}
         </section>
       )}
 

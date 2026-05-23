@@ -1,4 +1,5 @@
 import { CheckCircle2, Circle, Clock3 } from "lucide-react";
+import { formatChallengeDate } from "../domain/challengeDates";
 import { getCompletedDays, getCompletionPercent, getRemainingDays } from "../domain/progress";
 import type { ChallengePlan, ProofEntry } from "../domain/types";
 
@@ -7,16 +8,6 @@ interface Props {
   proofs: ProofEntry[];
   currentDay: number;
   startDate: string;
-}
-
-function formatChallengeDate(startDate: string, day: number): string {
-  const date = new Date(`${startDate}T00:00:00`);
-  date.setDate(date.getDate() + day - 1);
-  return new Intl.DateTimeFormat("th-TH-u-ca-gregory", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-  }).format(date);
 }
 
 export function PlanView({ plan, proofs, currentDay, startDate }: Props) {

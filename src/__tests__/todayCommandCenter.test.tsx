@@ -1,5 +1,5 @@
 import "@testing-library/jest-dom/vitest";
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it, vi } from "vitest";
 import { TodayCommandCenter } from "../components/TodayCommandCenter";
 import type { ChallengeState, DailyMission } from "../domain/types";
@@ -26,6 +26,10 @@ describe("TodayCommandCenter", () => {
 
     expect(screen.getByText("พรุ่งนี้")).toBeInTheDocument();
     expect(screen.getByRole("heading", { name: "วันที่ 2: Tomorrow task" })).toBeInTheDocument();
+    expect(screen.getByText("23 พ.ค. 2026")).toBeInTheDocument();
+    expect(screen.getByText("24 พ.ค. 2026")).toBeInTheDocument();
+    expect(screen.queryByText("Tomorrow task full task")).not.toBeInTheDocument();
+    fireEvent.click(screen.getByRole("button", { name: /ขยายรายละเอียดงานพรุ่งนี้/ }));
     expect(screen.getByText("Tomorrow task full task")).toBeInTheDocument();
     expect(screen.queryByText("ส่งหลักฐานแล้ว")).not.toBeInTheDocument();
   });
