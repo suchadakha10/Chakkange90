@@ -1,4 +1,5 @@
 import type { ChallengeState } from "../domain/types";
+import { getFirstIncompleteDay } from "../domain/progress";
 
 const STORAGE_KEY = "challenge90.strictCoach.v1";
 
@@ -28,12 +29,13 @@ export function loadChallengeState(): ChallengeState {
 
   try {
     const parsed = JSON.parse(raw) as Partial<ChallengeState>;
-    return {
+    const state = {
       ...defaults,
       ...parsed,
       proofSync: { ...defaults.proofSync, ...parsed.proofSync },
       styleKit: { ...defaults.styleKit, ...parsed.styleKit },
     };
+    return { ...state, currentDay: getFirstIncompleteDay(state.proofs) };
   } catch {
     return defaults;
   }

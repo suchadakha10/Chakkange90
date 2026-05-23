@@ -1,7 +1,7 @@
 import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, Flame, Send } from "lucide-react";
 import { useState } from "react";
 import { formatChallengeDate } from "../domain/challengeDates";
-import { getEmergencyCountThisWeek, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
+import { getEmergencyCountThisWeek, getFirstIncompleteDay, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
 import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
 import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
@@ -55,7 +55,8 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
       downgradeReason: level === "full" ? undefined : reason.trim() || "Time constraint",
     };
 
-    const nextState = { ...state, proofs: [proof, ...state.proofs] };
+    const nextProofs = [proof, ...state.proofs];
+    const nextState = { ...state, proofs: nextProofs, currentDay: getFirstIncompleteDay(nextProofs) };
     onChange(nextState);
     setTitle("");
     setNotes("");
@@ -75,10 +76,6 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
     } catch (error) {
       setSyncMessage(error instanceof Error ? `${error.message} แต่ proof ถูกเก็บในเครื่องแล้ว` : "ส่ง Google Sheet ไม่สำเร็จ แต่ proof ถูกเก็บในเครื่องแล้ว");
     }
-  }
-
-  function goToNextDay() {
-    onChange({ ...state, currentDay: Math.min(state.currentDay + 1, 90) });
   }
 
   return (
@@ -189,9 +186,6 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
         <div className="action-row">
           <button className="primary-action" disabled={!canSubmit} onClick={submitProof} type="button">
             <Send size={16} /> ส่งหลักฐาน
-          </button>
-          <button className="secondary-action" disabled={!dayDone || state.currentDay >= 90} onClick={goToNextDay} type="button">
-            ไปวันถัดไป
           </button>
         </div>
         {syncMessage && <p className="muted">{syncMessage}</p>}

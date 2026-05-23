@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { getFirstIncompleteDay } from "../domain/progress";
 import type { ChallengeState } from "../domain/types";
 import { resetChallengeState } from "../storage/challengeStore";
 import { isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "../sync/proofSync";
@@ -19,6 +20,7 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
       const nextState = {
         ...state,
         proofs: replaceProofsFromRemote(remoteProofs),
+        currentDay: getFirstIncompleteDay(remoteProofs),
         proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() },
       };
       onChange(nextState);

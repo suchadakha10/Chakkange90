@@ -12,6 +12,14 @@ export function getCompletionPercent(proofs: ProofEntry[]): number {
   return Math.round((getCompletedDays(proofs) / 90) * 100);
 }
 
+export function getFirstIncompleteDay(proofs: ProofEntry[]): number {
+  const doneDays = new Set(proofs.map((proof) => proof.day));
+  for (let day = 1; day <= 90; day += 1) {
+    if (!doneDays.has(day)) return day;
+  }
+  return 90;
+}
+
 export function getStreak(proofs: ProofEntry[], currentDay: number): number {
   const doneDays = new Set(proofs.map((proof) => proof.day));
   let streak = 0;

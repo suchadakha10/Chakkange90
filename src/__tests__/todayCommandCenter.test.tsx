@@ -35,4 +35,12 @@ describe("TodayCommandCenter", () => {
     expect(screen.getByText("Tomorrow task full task")).toBeInTheDocument();
     expect(screen.queryByText("ส่งหลักฐานแล้ว")).not.toBeInTheDocument();
   });
+
+  it("does not show a manual next-day button", () => {
+    const state: ChallengeState = { ...createDefaultState(), currentDay: 1 };
+
+    render(<TodayCommandCenter mission={mission(1, "Today task")} tomorrowMission={mission(2, "Tomorrow task")} state={state} onChange={vi.fn()} />);
+
+    expect(screen.queryByRole("button", { name: "ไปวันถัดไป" })).not.toBeInTheDocument();
+  });
 });

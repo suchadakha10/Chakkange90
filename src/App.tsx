@@ -7,6 +7,7 @@ import { TodayCommandCenter } from "./components/TodayCommandCenter";
 import { WeeklyReview } from "./components/WeeklyReview";
 import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
+import { getFirstIncompleteDay } from "./domain/progress";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
 import { deleteProof, isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "./sync/proofSync";
 
@@ -31,6 +32,7 @@ export default function App() {
         setState((currentState) => ({
           ...currentState,
           proofs: replaceProofsFromRemote(remoteProofs),
+          currentDay: getFirstIncompleteDay(remoteProofs),
           proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
         }));
       })
@@ -51,6 +53,7 @@ export default function App() {
     setState((currentState) => ({
       ...currentState,
       proofs: currentState.proofs.filter((proof) => proof.id !== proofId),
+      currentDay: getFirstIncompleteDay(currentState.proofs.filter((proof) => proof.id !== proofId)),
     }));
 
     if (!isProofSyncConfigured(state.proofSync)) return;
