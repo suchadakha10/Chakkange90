@@ -1,0 +1,33 @@
+import { describe, expect, it } from "vitest";
+import { getCompletedDays, getMotionDrillsThisWeek, getStreak, shouldWarnMotionAvoidance } from "../domain/progress";
+import type { ProofEntry } from "../domain/types";
+
+const proof = (day: number, proofType: ProofEntry["proofType"] = "post"): ProofEntry => ({
+  id: `p-${day}-${proofType}`,
+  day,
+  level: "full",
+  proofType,
+  title: "Proof",
+  notes: "Done",
+  createdAt: "2026-05-23T00:00:00.000Z",
+});
+
+describe("progress rules", () => {
+  it("counts unique completed days", () => {
+    expect(getCompletedDays([proof(1), proof(1, "hook"), proof(2)])).toBe(2);
+  });
+
+  it("calculates streak ending at the current day", () => {
+    expect(getStreak([proof(1), proof(2), proof(4)], 4)).toBe(1);
+    expect(getStreak([proof(1), proof(2), proof(3)], 3)).toBe(3);
+  });
+
+  it("counts motion drills inside a week", () => {
+    expect(getMotionDrillsThisWeek([proof(1, "motion-drill"), proof(8, "motion-drill")], 1)).toBe(1);
+  });
+
+  it("warns when motion drills are below target after midweek", () => {
+    expect(shouldWarnMotionAvoidance([], 4, 2)).toBe(true);
+    expect(shouldWarnMotionAvoidance([proof(1, "motion-drill"), proof(3, "motion-drill")], 4, 2)).toBe(false);
+  });
+});

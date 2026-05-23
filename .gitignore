@@ -1,0 +1,8 @@
+node_modules/
+dist/
+.superpowers/
+.vite-dev.pid
+output-*.png
+*.log
+.env
+.env.*
