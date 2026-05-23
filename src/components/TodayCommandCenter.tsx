@@ -64,7 +64,7 @@ export function TodayCommandCenter({ mission, state, onChange }: Props) {
       <header className="page-header">
         <div>
           <p className="eyebrow dark">
-            Day {mission.day} / Week {mission.week}
+            วันที่ {mission.day} / สัปดาห์ {mission.week}
           </p>
           <h2>{mission.title}</h2>
           <p>{mission.focus}</p>
@@ -83,16 +83,16 @@ export function TodayCommandCenter({ mission, state, onChange }: Props) {
       {motionWarning && (
         <div className="warning">
           <AlertTriangle size={18} />
-          Motion graphic is being avoided this week. Do one small export today.
+          สัปดาห์นี้ยังเลี่ยง Motion อยู่ วันนี้ต้องส่งออกงานเล็ก ๆ อย่างน้อย 1 ชิ้น
         </div>
       )}
 
       <section className="panel">
         <div className="panel-heading">
-          <h3>Today's Mission</h3>
+          <h3>ภารกิจวันนี้</h3>
           {dayDone && (
             <span className="done-pill">
-              <CheckCircle2 size={16} /> Proof submitted
+              <CheckCircle2 size={16} /> ส่งหลักฐานแล้ว
             </span>
           )}
         </div>
@@ -113,24 +113,24 @@ export function TodayCommandCenter({ mission, state, onChange }: Props) {
       </section>
 
       <section className="panel">
-        <h3>Submit Proof</h3>
-        {level !== "full" && <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="Reason for downgrade" />}
-        <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="Proof title" />
-        <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="Optional link" />
+        <h3>ส่งหลักฐาน</h3>
+        {level !== "full" && <input value={reason} onChange={(event) => setReason(event.target.value)} placeholder="เหตุผลที่ลดขนาดงาน" />}
+        <input value={title} onChange={(event) => setTitle(event.target.value)} placeholder="ชื่อหลักฐาน / ชื่องานที่ทำ" />
+        <input value={url} onChange={(event) => setUrl(event.target.value)} placeholder="ลิงก์ถ้ามี" />
         <textarea value={notes} onChange={(event) => setNotes(event.target.value)} placeholder={mission.proofPrompt} rows={4} />
         <div className="action-row">
           <button className="primary-action" disabled={!canSubmit} onClick={submitProof} type="button">
-            <Send size={16} /> Submit proof
+            <Send size={16} /> ส่งหลักฐาน
           </button>
           <button className="secondary-action" disabled={!dayDone || state.currentDay >= 90} onClick={goToNextDay} type="button">
-            Next day
+            ไปวันถัดไป
           </button>
         </div>
       </section>
 
       <section className="panel compact">
         <CheckCircle2 size={18} />
-        No proof means today is not done.
+        ถ้าไม่มีหลักฐาน วันนี้ยังไม่นับว่าสำเร็จ
       </section>
     </div>
   );

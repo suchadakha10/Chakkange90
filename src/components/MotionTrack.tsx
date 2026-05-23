@@ -2,11 +2,11 @@ import { getMotionDrillsThisWeek, getWeekForDay } from "../domain/progress";
 import type { ChallengeState } from "../domain/types";
 
 const ladder = [
-  ["L1", "Text pop", "Animate words in and out clearly."],
-  ["L2", "Shape + label", "Use bright blocks to point at important ideas."],
-  ["L3", "Icon motion", "Move arrows, circles, checks, and simple symbols."],
-  ["L4", "Step explainer", "Explain a process in 3 clean steps."],
-  ["L5", "Full motion clip", "Make a 20-30 second motion-first explainer."],
+  ["L1", "Text pop", "ทำให้คำเด้งเข้าออกแบบอ่านง่าย"],
+  ["L2", "Shape + label", "ใช้กล่องสี/ป้ายกำกับชี้จุดสำคัญ"],
+  ["L3", "Icon motion", "ขยับลูกศร วงกลม เครื่องหมายถูก หรือไอคอนง่าย ๆ"],
+  ["L4", "Step explainer", "อธิบายขั้นตอนให้จบใน 3 สเต็ป"],
+  ["L5", "Full motion clip", "ทำคลิป motion-first 20-30 วินาที"],
 ] as const;
 
 export function MotionTrack({ state }: { state: ChallengeState }) {
@@ -17,9 +17,9 @@ export function MotionTrack({ state }: { state: ChallengeState }) {
     <div className="page-stack">
       <header className="page-header">
         <div>
-          <p className="eyebrow dark">Mandatory skill</p>
+          <p className="eyebrow dark">สกิลบังคับ</p>
           <h2>Motion Track</h2>
-          <p>{drills}/2 drills completed this week.</p>
+          <p>สัปดาห์นี้ทำ motion drill แล้ว {drills}/2 งาน</p>
         </div>
       </header>
       <div className="ladder-grid">

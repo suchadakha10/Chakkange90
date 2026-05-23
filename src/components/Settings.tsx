@@ -6,14 +6,14 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
     <div className="page-stack">
       <header className="page-header">
         <div>
-          <p className="eyebrow dark">Personal system</p>
-          <h2>Settings</h2>
+          <p className="eyebrow dark">ระบบส่วนตัว</p>
+          <h2>ตั้งค่า</h2>
         </div>
       </header>
       <section className="panel">
         <h3>Challenge</h3>
-        <p>Start date: {state.startDate}</p>
-        <p>Emergency limit: {state.emergencyLimitPerWeek} / week</p>
+        <p>วันที่เริ่ม: {state.startDate}</p>
+        <p>โควตา Emergency: {state.emergencyLimitPerWeek} ครั้ง / สัปดาห์</p>
       </section>
       <section className="panel">
         <h3>Pop Art Minimalist Style Kit</h3>
@@ -27,7 +27,7 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
       </section>
       <section className="panel">
         <button className="secondary-action danger" onClick={() => onChange(resetChallengeState())} type="button">
-          Reset challenge data
+          รีเซ็ตข้อมูล challenge
         </button>
       </section>
     </div>

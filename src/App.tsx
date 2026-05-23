@@ -9,11 +9,11 @@ import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
 
-const tabs = ["Today", "90-Day Plan", "Motion Track", "Proof Vault", "Review", "Settings"] as const;
+const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState<Tab>("Today");
+  const [activeTab, setActiveTab] = useState<Tab>("วันนี้");
   const [state, setState] = useState<ChallengeState>(() => loadChallengeState());
 
   useEffect(() => {
@@ -30,6 +30,7 @@ export default function App() {
       <aside className="sidebar">
         <p className="eyebrow">90-Day Strict Coach</p>
         <h1>เทคข้างร้าน</h1>
+        <p className="sidebar-note">ทำงานให้ครบ 90 วัน โดยนับจากหลักฐานจริงเท่านั้น</p>
         <nav>
           {tabs.map((tab) => (
             <button key={tab} className={`nav-button ${activeTab === tab ? "is-active" : ""}`} onClick={() => setActiveTab(tab)} type="button">
@@ -39,12 +40,12 @@ export default function App() {
         </nav>
       </aside>
       <section className="workspace">
-        {activeTab === "Today" && <TodayCommandCenter mission={todayMission} state={state} onChange={setState} />}
-        {activeTab === "90-Day Plan" && <PlanView plan={seedPlan} />}
-        {activeTab === "Motion Track" && <MotionTrack state={state} />}
-        {activeTab === "Proof Vault" && <ProofVault proofs={state.proofs} />}
-        {activeTab === "Review" && <WeeklyReview state={state} onChange={setState} />}
-        {activeTab === "Settings" && <Settings state={state} onChange={setState} />}
+        {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} state={state} onChange={setState} />}
+        {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
+        {activeTab === "Motion" && <MotionTrack state={state} />}
+        {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} />}
+        {activeTab === "รีวิว" && <WeeklyReview state={state} onChange={setState} />}
+        {activeTab === "ตั้งค่า" && <Settings state={state} onChange={setState} />}
       </section>
     </main>
   );

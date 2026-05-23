@@ -4,6 +4,14 @@ export function getCompletedDays(proofs: ProofEntry[]): number {
   return new Set(proofs.map((proof) => proof.day)).size;
 }
 
+export function getRemainingDays(proofs: ProofEntry[]): number {
+  return Math.max(90 - getCompletedDays(proofs), 0);
+}
+
+export function getCompletionPercent(proofs: ProofEntry[]): number {
+  return Math.round((getCompletedDays(proofs) / 90) * 100);
+}
+
 export function getStreak(proofs: ProofEntry[], currentDay: number): number {
   const doneDays = new Set(proofs.map((proof) => proof.day));
   let streak = 0;

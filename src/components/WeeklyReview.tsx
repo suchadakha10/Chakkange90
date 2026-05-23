@@ -36,27 +36,27 @@ export function WeeklyReview({ state, onChange }: { state: ChallengeState; onCha
       <header className="page-header">
         <div>
           <p className="eyebrow dark">Week {week}</p>
-          <h2>Weekly Review</h2>
+          <h2>รีวิวรายสัปดาห์</h2>
           <p>
-            {completedDays} completed days / {motionDrills} motion drills this week.
+            ทำแล้ว {completedDays} วัน / motion drill สัปดาห์นี้ {motionDrills} งาน
           </p>
         </div>
       </header>
       <section className="panel">
-        <textarea value={bestSignal} onChange={(event) => setBestSignal(event.target.value)} placeholder="Best signal from audience or your own practice" rows={3} />
-        <textarea value={avoided} onChange={(event) => setAvoided(event.target.value)} placeholder="What did you avoid?" rows={3} />
-        <textarea value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="One adjustment for next week" rows={3} />
+        <textarea value={bestSignal} onChange={(event) => setBestSignal(event.target.value)} placeholder="สัญญาณที่ดีที่สุดจากคนดูหรือจากการฝึกของตัวเอง" rows={3} />
+        <textarea value={avoided} onChange={(event) => setAvoided(event.target.value)} placeholder="สัปดาห์นี้เลี่ยงอะไร" rows={3} />
+        <textarea value={adjustment} onChange={(event) => setAdjustment(event.target.value)} placeholder="สัปดาห์หน้าจะปรับ 1 เรื่องอะไร" rows={3} />
         <button className="primary-action" disabled={!canSubmit} onClick={submitReview} type="button">
-          Lock weekly review
+          บันทึกรีวิวสัปดาห์
         </button>
       </section>
       <div className="proof-list">
         {state.weeklyReviews.map((review) => (
           <section className="panel" key={`${review.week}-${review.createdAt}`}>
-            <h3>Week {review.week}</h3>
+            <h3>สัปดาห์ {review.week}</h3>
             <p>{review.bestSignal}</p>
-            <p className="muted">Avoided: {review.avoided}</p>
-            <p className="muted">Next: {review.adjustment}</p>
+            <p className="muted">สิ่งที่เลี่ยง: {review.avoided}</p>
+            <p className="muted">รอบหน้า: {review.adjustment}</p>
           </section>
         ))}
       </div>

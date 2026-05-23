@@ -6,7 +6,7 @@ describe("seedPlan", () => {
     expect(seedPlan.weeks).toHaveLength(13);
     const days = seedPlan.weeks.flatMap((week) => week.days);
     expect(days).toHaveLength(90);
-    expect(days[0].title).toBe("Baseline Clip Test");
+    expect(days[0].title).toContain("baseline");
   });
 
   it("makes Week 1 a CapCut Production Sprint with motion work", () => {

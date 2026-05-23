@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getCompletedDays, getMotionDrillsThisWeek, getStreak, shouldWarnMotionAvoidance } from "../domain/progress";
+import { getCompletedDays, getCompletionPercent, getMotionDrillsThisWeek, getRemainingDays, getStreak, shouldWarnMotionAvoidance } from "../domain/progress";
 import type { ProofEntry } from "../domain/types";
 
 const proof = (day: number, proofType: ProofEntry["proofType"] = "post"): ProofEntry => ({
@@ -15,6 +15,14 @@ const proof = (day: number, proofType: ProofEntry["proofType"] = "post"): ProofE
 describe("progress rules", () => {
   it("counts unique completed days", () => {
     expect(getCompletedDays([proof(1), proof(1, "hook"), proof(2)])).toBe(2);
+  });
+
+  it("calculates remaining days from unique proof days", () => {
+    expect(getRemainingDays([proof(1), proof(1, "hook"), proof(90)])).toBe(88);
+  });
+
+  it("calculates completion percent from unique proof days", () => {
+    expect(getCompletionPercent([proof(1), proof(2), proof(3), proof(4), proof(5)])).toBe(6);
   });
 
   it("calculates streak ending at the current day", () => {

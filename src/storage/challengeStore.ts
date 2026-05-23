@@ -11,8 +11,8 @@ export function createDefaultState(): ChallengeState {
     emergencyLimitPerWeek: 2,
     styleKit: {
       palette: ["#ffdd00", "#00c2ff", "#ff4fa3", "#111111", "#f7f7f2"],
-      subtitleRule: "No more than 2 lines. Highlight only the key word.",
-      layoutRule: "One main message per screen. Bright accents, clean layout.",
+      subtitleRule: "ซับไม่เกิน 2 บรรทัด ไฮไลต์เฉพาะคำสำคัญ",
+      layoutRule: "หนึ่งจอมีหนึ่งข้อความหลัก ใช้สีสดเป็นจุดเน้น และจัดหน้าให้โล่ง",
     },
   };
 }
