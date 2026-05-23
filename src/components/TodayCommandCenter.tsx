@@ -136,7 +136,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
       </section>
 
       {tomorrowMission && (
-        <section className="panel tomorrow-panel">
+        <section className={`panel tomorrow-panel ${tomorrowExpanded ? "is-expanded" : "is-collapsed"}`}>
           <div className="panel-heading">
             <div>
               <p className="eyebrow dark">พรุ่งนี้</p>
@@ -145,26 +145,35 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
               </h3>
               <p className="challenge-date">{tomorrowDate}</p>
             </div>
-            {tomorrowMission.requiresMotion && <span className="tag">Motion</span>}
+            <div className="tomorrow-actions">
+              {tomorrowMission.requiresMotion && <span className="tag">Motion</span>}
+              <button
+                aria-expanded={tomorrowExpanded}
+                className="icon-toggle"
+                onClick={() => setTomorrowExpanded((isExpanded) => !isExpanded)}
+                title={tomorrowExpanded ? "ย่องานพรุ่งนี้" : "ขยายงานพรุ่งนี้"}
+                type="button"
+              >
+                {tomorrowExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+              </button>
+            </div>
           </div>
-          <p>{tomorrowMission.focus}</p>
-          <button className="detail-toggle" onClick={() => setTomorrowExpanded((isExpanded) => !isExpanded)} type="button">
-            {tomorrowExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-            {tomorrowExpanded ? "ย่อรายละเอียดงานพรุ่งนี้" : "ขยายรายละเอียดงานพรุ่งนี้"}
-          </button>
           {tomorrowExpanded && (
-            <div className="tomorrow-grid">
-              <div>
-                <strong>FULL</strong>
-                <span>{tomorrowMission.full}</span>
-              </div>
-              <div>
-                <strong>MINIMUM</strong>
-                <span>{tomorrowMission.minimum}</span>
-              </div>
-              <div>
-                <strong>EMERGENCY</strong>
-                <span>{tomorrowMission.emergency}</span>
+            <div className="tomorrow-expanded-content">
+              <p>{tomorrowMission.focus}</p>
+              <div className="tomorrow-grid">
+                <div>
+                  <strong>FULL</strong>
+                  <span>{tomorrowMission.full}</span>
+                </div>
+                <div>
+                  <strong>MINIMUM</strong>
+                  <span>{tomorrowMission.minimum}</span>
+                </div>
+                <div>
+                  <strong>EMERGENCY</strong>
+                  <span>{tomorrowMission.emergency}</span>
+                </div>
               </div>
             </div>
           )}

@@ -224,24 +224,46 @@ textarea {
   border-color: #00c2ff;
 }
 
-.detail-toggle {
+.tomorrow-panel.is-collapsed {
+  padding-bottom: 10px;
+}
+
+.tomorrow-panel.is-collapsed h3,
+.tomorrow-panel.is-collapsed .challenge-date {
+  margin-bottom: 0;
+}
+
+.tomorrow-actions {
   align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  gap: 8px;
+}
+
+.icon-toggle {
+  align-items: center;
+  aspect-ratio: 1;
   background: #101016;
   border: 1px solid #30303c;
   border-radius: 8px;
   color: #f7f7f2;
   cursor: pointer;
   display: inline-flex;
-  font-weight: 800;
-  gap: 8px;
-  margin-top: 4px;
+  justify-content: center;
   min-height: 40px;
-  padding: 9px 12px;
+  padding: 0;
+  width: 40px;
 }
 
-.detail-toggle:hover {
+.icon-toggle:hover {
   border-color: #00c2ff;
   color: #00c2ff;
+}
+
+.tomorrow-expanded-content {
+  display: grid;
+  gap: 14px;
+  margin-top: 12px;
 }
 
 .tomorrow-grid {

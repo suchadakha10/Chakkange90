@@ -28,8 +28,10 @@ describe("TodayCommandCenter", () => {
     expect(screen.getByRole("heading", { name: "วันที่ 2: Tomorrow task" })).toBeInTheDocument();
     expect(screen.getByText("23 พ.ค. 2026")).toBeInTheDocument();
     expect(screen.getByText("24 พ.ค. 2026")).toBeInTheDocument();
+    expect(screen.queryByText("Tomorrow task focus")).not.toBeInTheDocument();
     expect(screen.queryByText("Tomorrow task full task")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: /ขยายรายละเอียดงานพรุ่งนี้/ }));
+    fireEvent.click(screen.getByRole("button", { name: "ขยายงานพรุ่งนี้" }));
+    expect(screen.getByText("Tomorrow task focus")).toBeInTheDocument();
     expect(screen.getByText("Tomorrow task full task")).toBeInTheDocument();
     expect(screen.queryByText("ส่งหลักฐานแล้ว")).not.toBeInTheDocument();
   });
