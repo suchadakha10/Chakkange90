@@ -8,7 +8,7 @@ import { WeeklyReview } from "./components/WeeklyReview";
 import { seedPlan } from "./domain/seedPlan";
 import type { ChallengeState } from "./domain/types";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
-import { isProofSyncConfigured, mergeProofs, pullProofs } from "./sync/proofSync";
+import { deleteProof, isProofSyncConfigured, mergeProofs, pullProofs } from "./sync/proofSync";
 
 const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
@@ -47,6 +47,25 @@ export default function App() {
   const todayMission = useMemo(() => missions.find((day) => day.day === state.currentDay) ?? missions[0], [missions, state.currentDay]);
   const tomorrowMission = useMemo(() => missions.find((day) => day.day === state.currentDay + 1), [missions, state.currentDay]);
 
+  async function handleDeleteProof(proofId: string) {
+    setState((currentState) => ({
+      ...currentState,
+      proofs: currentState.proofs.filter((proof) => proof.id !== proofId),
+    }));
+
+    if (!isProofSyncConfigured(state.proofSync)) return;
+
+    try {
+      await deleteProof(state.proofSync, proofId);
+      setState((currentState) => ({
+        ...currentState,
+        proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
+      }));
+    } catch {
+      // Keep the local delete applied even if the remote sheet is temporarily unreachable.
+    }
+  }
+
   return (
     <main className="app-shell">
       <aside className="sidebar">
@@ -65,7 +84,7 @@ export default function App() {
         {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} tomorrowMission={tomorrowMission} state={state} onChange={setState} />}
         {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
         {activeTab === "Motion" && <MotionTrack state={state} />}
-        {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} />}
+        {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} onDeleteProof={(proof) => handleDeleteProof(proof.id)} />}
         {activeTab === "รีวิว" && <WeeklyReview state={state} onChange={setState} />}
         {activeTab === "ตั้งค่า" && <Settings state={state} onChange={setState} />}
       </section>

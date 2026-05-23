@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
-import { mergeProofs, pullProofs, pushProof } from "../sync/proofSync";
+import { deleteProof, mergeProofs, pullProofs, pushProof } from "../sync/proofSync";
 import type { ProofEntry } from "../domain/types";
 
 const proof = (id: string, day: number): ProofEntry => ({
@@ -42,6 +42,23 @@ describe("proofSync", () => {
       expect.objectContaining({
         method: "POST",
         body: expect.stringContaining("\"action\":\"saveProof\""),
+      }),
+    );
+  });
+
+  it("deletes a proof through Apps Script endpoint", async () => {
+    const fetchMock = vi.fn().mockResolvedValue({
+      ok: true,
+      json: () => Promise.resolve({ ok: true }),
+    });
+
+    await deleteProof({ scriptUrl: "https://script.google.com/macros/s/demo/exec", secret: "abc" }, "local", fetchMock);
+
+    expect(fetchMock).toHaveBeenCalledWith(
+      "https://script.google.com/macros/s/demo/exec",
+      expect.objectContaining({
+        method: "POST",
+        body: expect.stringContaining("\"action\":\"deleteProof\""),
       }),
     );
   });

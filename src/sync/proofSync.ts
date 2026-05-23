@@ -48,3 +48,20 @@ export async function pushProof(config: ProofSyncConfig, proof: ProofEntry, fetc
   const data = (await response.json()) as { ok?: boolean; error?: string };
   if (!data.ok) throw new Error(data.error || "ส่ง proof ไป Google Sheet ไม่สำเร็จ");
 }
+
+export async function deleteProof(config: ProofSyncConfig, proofId: string, fetcher: FetchLike = fetch): Promise<void> {
+  const response = await fetcher(cleanScriptUrl(config.scriptUrl), {
+    method: "POST",
+    headers: { "Content-Type": "text/plain;charset=utf-8" },
+    body: JSON.stringify({
+      action: "deleteProof",
+      secret: config.secret,
+      proofId,
+    }),
+  });
+
+  if (!response.ok) throw new Error(`Delete proof failed (${response.status})`);
+
+  const data = (await response.json()) as { ok?: boolean; error?: string };
+  if (!data.ok) throw new Error(data.error || "Delete proof failed");
+}
