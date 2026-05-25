@@ -437,12 +437,71 @@ textarea::placeholder {
 }
 
 .content-option-grid,
+.topic-idea-grid,
 .storyboard-grid,
 .storyboard-design-sheet,
 .prompt-grid {
   display: grid;
   gap: 12px;
   margin-top: 14px;
+}
+
+.generation-source {
+  color: #34e89e;
+  font-size: 13px;
+  font-weight: 800;
+  margin: 8px 0 0;
+}
+
+.topic-radar {
+  border-top: 1px solid #30303c;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.topic-radar h3 {
+  color: #ffffff;
+  margin: 0;
+}
+
+.topic-compose {
+  border-top: 1px solid #30303c;
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+}
+
+.topic-compose h3 {
+  color: #ffffff;
+  margin: 0;
+}
+
+.topic-idea-card {
+  background: #101016;
+  border: 1px solid #30303c;
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+
+.topic-idea-card h4 {
+  color: #ffffff;
+  margin: 0;
+}
+
+.topic-idea-card p {
+  color: #d8d8e2;
+  line-height: 1.45;
+  margin: 0;
+}
+
+.topic-idea-card small {
+  color: #a9a9ba;
+  line-height: 1.4;
 }
 
 .content-option {
@@ -729,14 +788,11 @@ textarea::placeholder {
   }
 
   .studio-form-grid {
-    grid-template-columns: 2fr repeat(2, minmax(0, 1fr));
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
-  .studio-form-grid label:first-child {
-    grid-row: span 2;
-  }
-
-  .content-option-grid {
+  .content-option-grid,
+  .topic-idea-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

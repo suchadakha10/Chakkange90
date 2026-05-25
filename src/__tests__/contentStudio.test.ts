@@ -1,7 +1,24 @@
 import { describe, expect, it } from "vitest";
-import { createStoryboard, generateContentOptions } from "../domain/contentStudio";
+import { createStoryboard, generateContentOptions, generateTopicIdeas } from "../domain/contentStudio";
 
 describe("content studio generator", () => {
+  it("creates platform-aware topic ideas before content options", () => {
+    const ideas = generateTopicIdeas({
+      audience: "แม่ค้าออนไลน์",
+      platform: "TikTok",
+      tone: "เข้าใจง่าย",
+      topicCategory: "งานพิมพ์ / เอกสาร",
+    });
+
+    expect(ideas).toHaveLength(6);
+    expect(ideas[0]).toMatchObject({
+      source: "กระแสกำลังมา",
+      platform: "TikTok",
+    });
+    expect(ideas[0].title).toContain("แม่ค้าออนไลน์");
+    expect(ideas[0].title).toContain("งานพิมพ์ / เอกสาร");
+  });
+
   it("creates three broad content options from a topic", () => {
     const options = generateContentOptions({
       topic: "ร้านเล็กใช้ AI ตอบลูกค้าเร็วขึ้น",
