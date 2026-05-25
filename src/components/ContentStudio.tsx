@@ -4,6 +4,42 @@ import { createStoryboard, generateContentOptions, normalizeBrief, type ContentB
 
 const defaultBrief: ContentBrief = normalizeBrief({});
 
+const audienceOptions = [
+  "เจ้าของร้านเล็ก",
+  "แม่ค้าออนไลน์",
+  "ร้านอาหาร/คาเฟ่",
+  "ร้านพิมพ์/ถ่ายเอกสาร",
+  "คนเริ่มทำคอนเทนต์",
+  "มือใหม่ใช้ AI/Canva/CapCut",
+  "ลูกค้าทั่วไปที่ไม่ถนัดเทค",
+  "นักเรียน/นักศึกษา",
+  "ฟรีแลนซ์/คนทำงานคนเดียว",
+];
+
+const platformOptions = [
+  "TikTok",
+  "Facebook Reels",
+  "Instagram Reels",
+  "YouTube Shorts",
+  "Facebook Post",
+  "Facebook Page",
+  "LINE OA Broadcast",
+  "Canva Presentation",
+  "CapCut Video",
+];
+
+const toneOptions = [
+  "เข้าใจง่าย",
+  "จริงใจ/เป็นกันเอง",
+  "กระตุ้นให้ลงมือทำ",
+  "สอนแบบจับมือทำ",
+  "เตือนข้อผิดพลาด",
+  "มืออาชีพ/น่าเชื่อถือ",
+  "สนุก/ไว/จังหวะเร็ว",
+  "อบอุ่น/ช่วยเหลือ",
+  "ขายแบบไม่ยัดเยียด",
+];
+
 export function ContentStudio() {
   const [brief, setBrief] = useState<ContentBrief>(defaultBrief);
   const [options, setOptions] = useState<ContentOption[]>([]);
@@ -50,11 +86,23 @@ export function ContentStudio() {
           </label>
           <label>
             <span>กลุ่มคนดู</span>
-            <input value={brief.audience} onChange={(event) => updateBrief("audience", event.target.value)} />
+            <select value={brief.audience} onChange={(event) => updateBrief("audience", event.target.value)}>
+              {audienceOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             <span>แพลตฟอร์ม</span>
-            <input value={brief.platform} onChange={(event) => updateBrief("platform", event.target.value)} />
+            <select value={brief.platform} onChange={(event) => updateBrief("platform", event.target.value)}>
+              {platformOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
           <label>
             <span>ความยาว</span>
@@ -62,7 +110,13 @@ export function ContentStudio() {
           </label>
           <label>
             <span>โทน</span>
-            <input value={brief.tone} onChange={(event) => updateBrief("tone", event.target.value)} />
+            <select value={brief.tone} onChange={(event) => updateBrief("tone", event.target.value)}>
+              {toneOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
         </div>
         <div className="action-row">
