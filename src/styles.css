@@ -301,7 +301,8 @@ textarea {
 }
 
 input,
-textarea {
+textarea,
+select {
   background: #0d0d12;
   border: 1px solid #343442;
   border-radius: 8px;
