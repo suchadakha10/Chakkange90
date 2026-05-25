@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
+import { ContentStudio } from "./components/ContentStudio";
 import { MotionTrack } from "./components/MotionTrack";
 import { PlanView } from "./components/PlanView";
 import { ProofVault } from "./components/ProofVault";
@@ -11,7 +12,7 @@ import { getCurrentChallengeDay } from "./domain/progress";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
 import { deleteProof, isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "./sync/proofSync";
 
-const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
+const tabs = ["วันนี้", "ตาราง 90 วัน", "Motion", "Content Studio", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
 
 export default function App() {
@@ -90,6 +91,7 @@ export default function App() {
         {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} tomorrowMission={tomorrowMission} state={state} onChange={setState} />}
         {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
         {activeTab === "Motion" && <MotionTrack state={state} />}
+        {activeTab === "Content Studio" && <ContentStudio />}
         {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} onDeleteProof={(proof) => handleDeleteProof(proof.id)} />}
         {activeTab === "รีวิว" && <WeeklyReview state={state} onChange={setState} />}
         {activeTab === "ตั้งค่า" && <Settings state={state} onChange={setState} />}
