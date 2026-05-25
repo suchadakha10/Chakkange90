@@ -20,7 +20,7 @@ const mission = (day: number, title: string): DailyMission => ({
 
 describe("TodayCommandCenter", () => {
   it("shows tomorrow mission details without marking it done", () => {
-    const state: ChallengeState = { ...createDefaultState(), currentDay: 1 };
+    const state: ChallengeState = { ...createDefaultState(), startDate: "2026-05-23", currentDay: 1 };
 
     render(<TodayCommandCenter mission={mission(1, "Today task")} tomorrowMission={mission(2, "Tomorrow task")} state={state} onChange={vi.fn()} />);
 
