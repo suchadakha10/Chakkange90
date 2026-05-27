@@ -19,5 +19,6 @@ describe("App confidence integration", () => {
 
     expect(screen.getByRole("heading", { name: "ความมั่นใจ 90 วัน" })).toBeInTheDocument();
     expect(screen.getByText("สัญญาความมั่นใจวันนี้")).toBeInTheDocument();
+    expect(screen.getByText("งานจากตาราง 90 วัน")).toBeInTheDocument();
   });
 });

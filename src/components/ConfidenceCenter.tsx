@@ -3,10 +3,11 @@ import { useState } from "react";
 import { formatChallengeDate } from "../domain/challengeDates";
 import { confidencePhases, confidenceProofTypeForLevel, getConfidenceContract } from "../domain/confidence";
 import { getCurrentChallengeDay, getEmergencyCountThisWeek, getStreak, getWeekForDay } from "../domain/progress";
-import type { ChallengeState, ProofEntry, TaskLevel } from "../domain/types";
+import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
 import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
 interface Props {
+  currentMission?: DailyMission;
   state: ChallengeState;
   onChange: (state: ChallengeState) => void;
 }
@@ -23,7 +24,7 @@ const taskLevelLabels: Record<TaskLevel, string> = {
   emergency: "ฉุกเฉิน",
 };
 
-export function ConfidenceCenter({ state, onChange }: Props) {
+export function ConfidenceCenter({ currentMission, state, onChange }: Props) {
   const [level, setLevel] = useState<TaskLevel>("full");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -124,6 +125,25 @@ export function ConfidenceCenter({ state, onChange }: Props) {
           </article>
         ))}
       </section>
+
+      {currentMission && (
+        <section className="panel confidence-linked-mission">
+          <p className="eyebrow dark">งานจากตาราง 90 วัน</p>
+          <h3>
+            วันที่ {currentMission.day}: {currentMission.title}
+          </h3>
+          <p className="challenge-date">{todayDate}</p>
+          <p>{currentMission.focus}</p>
+          <div className="mission-task-grid">
+            {(["full", "minimum", "emergency"] as const).map((taskLevel) => (
+              <div className="mission-task-card" key={taskLevel}>
+                <strong>{taskLevelLabels[taskLevel]}</strong>
+                <span>{currentMission[taskLevel]}</span>
+              </div>
+            ))}
+          </div>
+        </section>
+      )}
 
       <section className="panel">
         <div className="panel-heading">

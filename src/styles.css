@@ -426,6 +426,36 @@ textarea::placeholder {
   font-weight: 800;
 }
 
+.confidence-linked-mission h3 {
+  margin-top: 4px;
+}
+
+.mission-task-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+  margin-top: 14px;
+}
+
+.mission-task-card {
+  background: #101016;
+  border: 1px solid #30303c;
+  border-radius: 8px;
+  color: #f7f7f2;
+  display: grid;
+  gap: 8px;
+  min-height: 96px;
+  padding: 12px;
+}
+
+.mission-task-card strong {
+  font-size: 13px;
+}
+
+.mission-task-card span {
+  line-height: 1.4;
+}
+
 .phase-ladder {
   display: grid;
   gap: 12px;
