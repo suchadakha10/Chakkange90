@@ -4,6 +4,7 @@ import { formatChallengeDate } from "../domain/challengeDates";
 import { confidencePhases, confidenceProofTypeForLevel, getConfidenceContract } from "../domain/confidence";
 import { getCurrentChallengeDay, getEmergencyCountThisWeek, getStreak, getWeekForDay } from "../domain/progress";
 import type { ChallengeState, ProofEntry, TaskLevel } from "../domain/types";
+import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
 interface Props {
   state: ChallengeState;
@@ -27,6 +28,7 @@ export function ConfidenceCenter({ state, onChange }: Props) {
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
   const [url, setUrl] = useState("");
+  const [syncMessage, setSyncMessage] = useState("");
   const week = getWeekForDay(state.currentDay);
   const contract = getConfidenceContract(state.currentDay);
   const streak = getStreak(state.proofs, state.currentDay);
@@ -39,7 +41,7 @@ export function ConfidenceCenter({ state, onChange }: Props) {
     return `${formatChallengeDate(state.startDate, startDay)} - ${formatChallengeDate(state.startDate, endDay)}`;
   }
 
-  function submitProof() {
+  async function submitProof() {
     if (!canSubmit) return;
 
     const proof: ProofEntry = {
@@ -56,10 +58,25 @@ export function ConfidenceCenter({ state, onChange }: Props) {
     };
 
     const nextProofs = [proof, ...state.proofs];
-    onChange({ ...state, proofs: nextProofs, currentDay: getCurrentChallengeDay(nextProofs, state.startDate) });
+    const nextState = { ...state, proofs: nextProofs, currentDay: getCurrentChallengeDay(nextProofs, state.startDate) };
+    onChange(nextState);
     setTitle("");
     setNotes("");
     setUrl("");
+
+    if (!isProofSyncConfigured(state.proofSync)) {
+      setSyncMessage("บันทึกในเครื่องนี้แล้ว ถ้าต้องการดูข้ามเครื่องให้ตั้งค่า Sync ในหน้า ตั้งค่า");
+      return;
+    }
+
+    try {
+      setSyncMessage("กำลังส่งหลักฐานไป Google Sheet...");
+      await pushProof(state.proofSync, proof);
+      onChange({ ...nextState, proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() } });
+      setSyncMessage("ส่งหลักฐานไป Google Sheet แล้ว");
+    } catch (error) {
+      setSyncMessage(error instanceof Error ? `${error.message} แต่หลักฐานถูกเก็บในเครื่องแล้ว` : "ส่ง Google Sheet ไม่สำเร็จ แต่หลักฐานถูกเก็บในเครื่องแล้ว");
+    }
   }
 
   return (
@@ -134,6 +151,7 @@ export function ConfidenceCenter({ state, onChange }: Props) {
             <Send size={16} /> บันทึกหลักฐานความมั่นใจ
           </button>
         </div>
+        {syncMessage && <p className="muted">{syncMessage}</p>}
       </section>
 
       <section className="panel compact confidence-review-card">
