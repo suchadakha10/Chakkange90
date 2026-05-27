@@ -30,6 +30,14 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
     }
   }
 
+  function updateStartDate(startDate: string) {
+    onChange({
+      ...state,
+      startDate,
+      currentDay: getCurrentChallengeDay(state.proofs, startDate),
+    });
+  }
+
   return (
     <div className="page-stack">
       <header className="page-header">
@@ -40,7 +48,10 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
       </header>
       <section className="panel">
         <h3>Challenge</h3>
-        <p>วันที่เริ่ม: {state.startDate}</p>
+        <label className="field-label">
+          Day 1 start date
+          <input aria-label="Day 1 start date" inputMode="numeric" pattern="\\d{4}-\\d{2}-\\d{2}" placeholder="YYYY-MM-DD" value={state.startDate} onChange={(event) => updateStartDate(event.target.value)} />
+        </label>
         <p>โควตา Emergency: {state.emergencyLimitPerWeek} ครั้ง / สัปดาห์</p>
       </section>
       <section className="panel">

@@ -319,6 +319,15 @@ textarea::placeholder {
   color: #888899;
 }
 
+.field-label {
+  color: #f7f7f2;
+  display: grid;
+  font-size: 13px;
+  font-weight: 800;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
 .action-row {
   display: flex;
   flex-wrap: wrap;
@@ -382,6 +391,72 @@ textarea::placeholder {
 
 .ladder-grid {
   grid-template-columns: 1fr;
+}
+
+.confidence-hero-panel {
+  align-items: stretch;
+  display: grid;
+  gap: 14px;
+}
+
+.confidence-proof-count {
+  background: #0d0d12;
+  border: 1px solid #30303c;
+  border-radius: 8px;
+  color: #f7f7f2;
+  display: grid;
+  gap: 6px;
+  min-width: 160px;
+  padding: 14px;
+}
+
+.confidence-proof-count svg {
+  color: #34e89e;
+}
+
+.confidence-proof-count strong {
+  color: #ffffff;
+  font-size: 34px;
+  line-height: 1;
+}
+
+.confidence-proof-count span {
+  color: #a9a9ba;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.phase-ladder {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr;
+}
+
+.phase-card {
+  box-shadow: none;
+}
+
+.phase-card.is-active {
+  border-color: #34e89e;
+  box-shadow: inset 0 0 0 1px #34e89e;
+}
+
+.phase-card strong {
+  color: #00c2ff;
+  font-size: 12px;
+}
+
+.confidence-review-card {
+  align-items: flex-start;
+}
+
+.confidence-review-card strong {
+  color: #ffffff;
+}
+
+.confidence-review-card ul {
+  margin: 8px 0 0;
+  padding-left: 18px;
 }
 
 .ladder-card strong {

@@ -19,6 +19,7 @@ describe("challengeStore", () => {
 
   it("creates default state with style kit and day 1", () => {
     const state = createDefaultState();
+    expect(state.startDate).toBe("2026-05-27");
     expect(state.currentDay).toBe(1);
     expect(state.proofSync).toEqual({ scriptUrl: "", secret: "" });
     expect(state.styleKit.palette).toEqual(["#ffdd00", "#00c2ff", "#ff4fa3", "#111111", "#f7f7f2"]);
@@ -34,5 +35,11 @@ describe("challengeStore", () => {
     const state = createDefaultState();
     saveChallengeState({ ...state, currentDay: 2, proofs: [] });
     expect(loadChallengeState().currentDay).toBe(1);
+  });
+
+  it("migrates the old May 26 start date to May 27", () => {
+    const state = createDefaultState();
+    saveChallengeState({ ...state, startDate: "2026-05-26" });
+    expect(loadChallengeState().startDate).toBe("2026-05-27");
   });
 });

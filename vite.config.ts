@@ -15,6 +15,30 @@ function contentStudioGeminiApi(env: Record<string, string>): Plugin {
   return {
     name: "content-studio-gemini-api",
     configureServer(server) {
+      server.middlewares.use("/sw.js", (request, response, next) => {
+        const devRequest = request as any;
+        if (devRequest.method !== "GET") {
+          next();
+          return;
+        }
+
+        response.statusCode = 200;
+        response.setHeader("Content-Type", "application/javascript; charset=utf-8");
+        response.end(`
+self.addEventListener("install", (event) => {
+  self.skipWaiting();
+});
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    Promise.all([
+      caches.keys().then((keys) => Promise.all(keys.map((key) => caches.delete(key)))),
+      self.registration.unregister(),
+    ]).then(() => self.clients.matchAll()).then((clients) => Promise.all(clients.map((client) => client.navigate(client.url)))))
+  );
+});
+`);
+      });
+
       server.middlewares.use("/api/content-studio/topics", async (request, response, next) => {
         const devRequest = request as any;
         if (devRequest.method !== "POST") {
