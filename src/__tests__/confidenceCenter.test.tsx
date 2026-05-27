@@ -3,6 +3,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from "@testing-library/re
 import { afterEach, describe, expect, it, vi } from "vitest";
 import { ConfidenceCenter } from "../components/ConfidenceCenter";
 import type { ChallengeState } from "../domain/types";
+import { seedPlan } from "../domain/seedPlan";
 import { createDefaultState } from "../storage/challengeStore";
 import { pushProof } from "../sync/proofSync";
 
@@ -32,6 +33,19 @@ describe("ConfidenceCenter", () => {
     expect(screen.getByText("25 มิ.ย. 2026 - 24 ก.ค. 2026")).toBeInTheDocument();
     expect(screen.getByText("รีวิวความมั่นใจประจำสัปดาห์")).toBeInTheDocument();
     expect(screen.getByText("สัปดาห์นี้ฉันกล้ากว่าปกติตรงไหน?")).toBeInTheDocument();
+  });
+
+  it("shows the matching 90-day table mission for the current day", () => {
+    const missions = seedPlan.weeks.flatMap((week) => week.days);
+    const currentMission = missions.find((mission) => mission.day === 4)!;
+    const state: ChallengeState = { ...createDefaultState(), startDate: "2026-05-27", currentDay: 4 };
+
+    render(<ConfidenceCenter currentMission={currentMission} state={state} onChange={vi.fn()} />);
+
+    expect(screen.getByText("งานจากตาราง 90 วัน")).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: "วันที่ 4: Motion Text Pop Drill" })).toBeInTheDocument();
+    expect(screen.getAllByText("30 พ.ค. 2026").length).toBeGreaterThan(0);
+    expect(screen.getByText("ทำ text pop animation 3 แบบ แล้ว export motion drill 5-10 วินาที")).toBeInTheDocument();
   });
 
   it("submits confidence proof into shared challenge state", () => {

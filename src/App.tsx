@@ -90,7 +90,7 @@ export default function App() {
       </aside>
       <section className="workspace">
         {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} tomorrowMission={tomorrowMission} state={state} onChange={setState} />}
-        {activeTab === "Confidence" && <ConfidenceCenter state={state} onChange={setState} />}
+        {activeTab === "Confidence" && <ConfidenceCenter currentMission={todayMission} state={state} onChange={setState} />}
         {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
         {activeTab === "Motion" && <MotionTrack state={state} />}
         {activeTab === "Content Studio" && <ContentStudio />}
