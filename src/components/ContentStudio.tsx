@@ -1,6 +1,7 @@
-import { Lightbulb, PanelsTopLeft, Sparkles } from "lucide-react";
+import { Lightbulb, PanelsTopLeft, Search, Sparkles } from "lucide-react";
 import { useMemo, useState } from "react";
-import { createStoryboard, generateContentOptions, normalizeBrief, type ContentBrief, type ContentOption, type StoryboardPack } from "../domain/contentStudio";
+import { requestGeminiContentPack, requestGeminiTopicIdeas, type ContentStudioApiPack, type TopicIdeasApiPack } from "../domain/contentStudioApi";
+import { createStoryboard, generateContentOptions, generateTopicIdeas, normalizeBrief, type ContentBrief, type ContentOption, type StoryboardPack, type TopicIdea } from "../domain/contentStudio";
 
 const defaultBrief: ContentBrief = normalizeBrief({});
 
@@ -40,25 +41,119 @@ const toneOptions = [
   "ขายแบบไม่ยัดเยียด",
 ];
 
+const topicCategoryOptions = [
+  "AI ช่วยงานร้าน",
+  "Canva / งานออกแบบ",
+  "CapCut / ตัดต่อคลิป",
+  "การขายออนไลน์",
+  "งานพิมพ์ / เอกสาร",
+  "คอนเทนต์ร้านเล็ก",
+  "ปัญหาลูกค้าถามบ่อย",
+  "ไอเดียตามกระแส",
+  "กำหนดเอง",
+];
+
 export function ContentStudio() {
   const [brief, setBrief] = useState<ContentBrief>(defaultBrief);
+  const [topicCategoryMode, setTopicCategoryMode] = useState(defaultBrief.topicCategory);
   const [options, setOptions] = useState<ContentOption[]>([]);
   const [selectedOption, setSelectedOption] = useState<ContentOption | null>(null);
-  const storyboard: StoryboardPack | null = useMemo(() => (selectedOption ? createStoryboard(selectedOption) : null), [selectedOption]);
+  const [storyboardsByOption, setStoryboardsByOption] = useState<ContentStudioApiPack["storyboardsByOption"]>({});
+  const [generationMeta, setGenerationMeta] = useState<ContentStudioApiPack | null>(null);
+  const [topicIdeas, setTopicIdeas] = useState<TopicIdea[]>([]);
+  const [topicMeta, setTopicMeta] = useState<TopicIdeasApiPack | null>(null);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [isGeneratingTopics, setIsGeneratingTopics] = useState(false);
+  const storyboard: StoryboardPack | null = useMemo(() => {
+    if (!selectedOption) {
+      return null;
+    }
+    const remoteStoryboard = storyboardsByOption?.[selectedOption.id];
+    if (remoteStoryboard) {
+      return {
+        option: selectedOption,
+        frames: remoteStoryboard.frames,
+        productionNotes: remoteStoryboard.productionNotes,
+      };
+    }
+    return createStoryboard(selectedOption);
+  }, [selectedOption, storyboardsByOption]);
   const canGenerate = brief.topic.trim().length > 0;
 
   function updateBrief(field: keyof ContentBrief, value: string) {
     setBrief((currentBrief) => ({ ...currentBrief, [field]: value }));
   }
 
-  function handleGenerateOptions() {
+  function updateTopicCategoryMode(value: string) {
+    setTopicCategoryMode(value);
+    if (value !== "กำหนดเอง") {
+      updateBrief("topicCategory", value);
+    } else {
+      updateBrief("topicCategory", "");
+    }
+  }
+
+  async function handleGenerateTopicIdeas() {
+    setIsGeneratingTopics(true);
+    try {
+      const pack = await requestGeminiTopicIdeas(brief);
+      if (pack.topics.length) {
+        setTopicIdeas(pack.topics);
+        setTopicMeta(pack);
+        return;
+      }
+    } catch {
+      // Fall back to local topic templates when Gemini is unavailable.
+    } finally {
+      setIsGeneratingTopics(false);
+    }
+
+    const nextTopics = generateTopicIdeas(brief);
+    setTopicIdeas(nextTopics);
+    setTopicMeta({
+      topics: nextTopics,
+      source: "template",
+      warning: "ใช้ template สำรอง เพราะ Gemini API ยังไม่พร้อมใช้งาน",
+    });
+  }
+
+  async function handleGenerateOptions() {
+    setIsGenerating(true);
+    setSelectedOption(null);
+    try {
+      const pack = await requestGeminiContentPack(brief);
+      if (pack.options.length) {
+        setOptions(pack.options);
+        setStoryboardsByOption(pack.storyboardsByOption || {});
+        setGenerationMeta(pack);
+        return;
+      }
+    } catch {
+      // Fall back to the built-in template when Gemini is unavailable or over quota.
+    } finally {
+      setIsGenerating(false);
+    }
+
     const nextOptions = generateContentOptions(brief);
     setOptions(nextOptions);
-    setSelectedOption(null);
+    setStoryboardsByOption({});
+    setGenerationMeta({
+      options: nextOptions,
+      source: "template",
+      warning: "ใช้ template สำรอง เพราะ Gemini API ยังไม่พร้อมใช้งาน",
+    });
   }
 
   function handleSelectOption(option: ContentOption) {
     setSelectedOption(option);
+  }
+
+  function handleUseTopic(idea: TopicIdea) {
+    setBrief((currentBrief) => ({ ...currentBrief, topic: idea.title }));
+    setOptions([]);
+    setSelectedOption(null);
+    setStoryboardsByOption({});
+    setGenerationMeta(null);
   }
 
   return (
@@ -67,23 +162,19 @@ export function ContentStudio() {
         <div>
           <p className="eyebrow dark">Content Studio</p>
           <h2>คิดคอนเทนต์ + Storyboard</h2>
-          <p>ใส่หัวข้อครั้งเดียว ระบบเสนอ 3 รูปแบบ แล้วแตกเป็น storyboard พร้อม prompt สำหรับทำคลิปต่อ</p>
+          <p>เลือกหมวดหมู่ก่อน ระบบช่วยคิดหัวข้อ แล้วค่อยแตกเป็นคอนเทนต์ 3 แบบและ storyboard</p>
         </div>
       </header>
 
       <section className="panel studio-brief-panel">
         <div className="panel-heading">
           <div>
-            <h3>Brief</h3>
-            <p className="muted">เวอร์ชันนี้เป็น template-based ไม่มีค่า API เพิ่ม</p>
+            <h3>1. ตั้งค่าการค้นหาหัวข้อ</h3>
+            <p className="muted">เริ่มจากบริบทและหมวดหมู่ แล้วให้ Gemini ช่วยคิดหัวข้อที่เหมาะกับแพลตฟอร์ม</p>
           </div>
           <Sparkles aria-hidden="true" />
         </div>
         <div className="studio-form-grid">
-          <label>
-            <span>หัวข้อคอนเทนต์</span>
-            <textarea aria-label="หัวข้อคอนเทนต์" value={brief.topic} onChange={(event) => updateBrief("topic", event.target.value)} rows={3} />
-          </label>
           <label>
             <span>กลุ่มคนดู</span>
             <select value={brief.audience} onChange={(event) => updateBrief("audience", event.target.value)}>
@@ -105,9 +196,21 @@ export function ContentStudio() {
             </select>
           </label>
           <label>
-            <span>ความยาว</span>
-            <input value={brief.length} onChange={(event) => updateBrief("length", event.target.value)} />
+            <span>หมวดหมู่หัวข้อ</span>
+            <select aria-label="หมวดหมู่หัวข้อ" value={topicCategoryMode} onChange={(event) => updateTopicCategoryMode(event.target.value)}>
+              {topicCategoryOptions.map((option) => (
+                <option key={option} value={option}>
+                  {option}
+                </option>
+              ))}
+            </select>
           </label>
+          {topicCategoryMode === "กำหนดเอง" && (
+            <label>
+              <span>หมวดหมู่ที่ต้องการค้นหา</span>
+              <input aria-label="หมวดหมู่ที่ต้องการค้นหา" value={brief.topicCategory} onChange={(event) => updateBrief("topicCategory", event.target.value)} />
+            </label>
+          )}
           <label>
             <span>โทน</span>
             <select value={brief.tone} onChange={(event) => updateBrief("tone", event.target.value)}>
@@ -118,11 +221,59 @@ export function ContentStudio() {
               ))}
             </select>
           </label>
+          <label>
+            <span>ความยาว</span>
+            <input value={brief.length} onChange={(event) => updateBrief("length", event.target.value)} />
+          </label>
         </div>
         <div className="action-row">
-          <button className="primary-action" disabled={!canGenerate} onClick={handleGenerateOptions} type="button">
+          <button className="secondary-action" disabled={isGeneratingTopics} onClick={handleGenerateTopicIdeas} type="button">
+            <Search size={18} />
+            {isGeneratingTopics ? "กำลังคิดหัวข้อ..." : "คิดหัวข้อจากหมวดหมู่"}
+          </button>
+        </div>
+        {topicIdeas.length > 0 && (
+          <div className="topic-radar">
+            <div>
+              <h3>Topic Radar</h3>
+              <p className="muted">เลือกหัวข้อจากกระแส/คำค้นหา หรือแก้หัวข้อเองในช่องด้านบนได้</p>
+              {topicMeta && (
+                <p className="generation-source">
+                  {topicMeta.source === "gemini" ? "Gemini API" : "Template สำรอง"}
+                  {topicMeta.model ? ` · ${topicMeta.model}` : ""}
+                  {topicMeta.activeKeyIndex ? ` · key #${topicMeta.activeKeyIndex}` : ""}
+                  {topicMeta.attemptedKeys ? ` · ลอง ${topicMeta.attemptedKeys} key` : ""}
+                  {topicMeta.warning ? ` · ${topicMeta.warning}` : ""}
+                </p>
+              )}
+            </div>
+            <div className="topic-idea-grid">
+              {topicIdeas.map((idea) => (
+                <article className="topic-idea-card" key={idea.id}>
+                  <span className="tag">{idea.source}</span>
+                  <h4>{idea.title}</h4>
+                  <p>{idea.insight}</p>
+                  <small>{idea.platform} · {idea.searchIntent}</small>
+                  <button className="secondary-action" onClick={() => handleUseTopic(idea)} type="button">
+                    ใช้หัวข้อนี้
+                  </button>
+                </article>
+              ))}
+            </div>
+          </div>
+        )}
+        <div className="topic-compose">
+          <div>
+            <h3>2. เลือกหรือพิมพ์หัวข้อ</h3>
+            <p className="muted">เลือกจาก Topic Radar หรือพิมพ์หัวข้อเองได้ ก่อนสร้างคอนเทนต์ 3 แบบ</p>
+          </div>
+          <label>
+            <span>หัวข้อที่เลือก</span>
+            <textarea aria-label="หัวข้อที่เลือก" value={brief.topic} onChange={(event) => updateBrief("topic", event.target.value)} rows={3} />
+          </label>
+          <button className="primary-action" disabled={!canGenerate || isGenerating} onClick={handleGenerateOptions} type="button">
             <Lightbulb size={18} />
-            คิดคอนเทนต์ 3 แบบ
+            {isGenerating ? "กำลังให้ Gemini คิด..." : "คิดคอนเทนต์ 3 แบบ"}
           </button>
         </div>
       </section>
@@ -136,6 +287,15 @@ export function ContentStudio() {
             </div>
             <PanelsTopLeft aria-hidden="true" />
           </div>
+          {generationMeta && (
+            <p className="generation-source">
+              {generationMeta.source === "gemini" ? "Gemini API" : "Template สำรอง"}
+              {generationMeta.model ? ` · ${generationMeta.model}` : ""}
+              {generationMeta.activeKeyIndex ? ` · key #${generationMeta.activeKeyIndex}` : ""}
+              {generationMeta.attemptedKeys ? ` · ลอง ${generationMeta.attemptedKeys} key` : ""}
+              {generationMeta.warning ? ` · ${generationMeta.warning}` : ""}
+            </p>
+          )}
           <div className="content-option-grid">
             {options.map((option) => (
               <article className={`content-option ${selectedOption?.id === option.id ? "is-selected" : ""}`} key={option.id}>

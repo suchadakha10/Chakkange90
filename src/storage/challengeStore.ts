@@ -2,10 +2,19 @@ import type { ChallengeState } from "../domain/types";
 import { getCurrentChallengeDay } from "../domain/progress";
 
 const STORAGE_KEY = "challenge90.strictCoach.v1";
+const DEFAULT_START_DATE = "2026-05-27";
+
+function getStorage(): Storage | undefined {
+  try {
+    return globalThis.localStorage;
+  } catch {
+    return undefined;
+  }
+}
 
 export function createDefaultState(): ChallengeState {
   return {
-    startDate: new Date().toISOString().slice(0, 10),
+    startDate: DEFAULT_START_DATE,
     currentDay: 1,
     proofs: [],
     weeklyReviews: [],
@@ -24,7 +33,8 @@ export function createDefaultState(): ChallengeState {
 
 export function loadChallengeState(): ChallengeState {
   const defaults = createDefaultState();
-  const raw = localStorage.getItem(STORAGE_KEY);
+  const storage = getStorage();
+  const raw = storage?.getItem(STORAGE_KEY);
   if (!raw) return defaults;
 
   try {
@@ -32,6 +42,7 @@ export function loadChallengeState(): ChallengeState {
     const state = {
       ...defaults,
       ...parsed,
+      startDate: parsed.startDate === "2026-05-26" ? DEFAULT_START_DATE : parsed.startDate ?? defaults.startDate,
       proofSync: { ...defaults.proofSync, ...parsed.proofSync },
       styleKit: { ...defaults.styleKit, ...parsed.styleKit },
     };
@@ -42,7 +53,7 @@ export function loadChallengeState(): ChallengeState {
 }
 
 export function saveChallengeState(state: ChallengeState): void {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+  getStorage()?.setItem(STORAGE_KEY, JSON.stringify(state));
 }
 
 export function resetChallengeState(): ChallengeState {

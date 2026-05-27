@@ -4,6 +4,7 @@ export type ContentBrief = {
   platform: string;
   length: string;
   tone: string;
+  topicCategory: string;
 };
 
 export type ContentFormat = "How-to" | "Problem-Solution" | "Story";
@@ -16,6 +17,15 @@ export type ContentOption = {
   angle: string;
   promise: string;
   brief: ContentBrief;
+};
+
+export type TopicIdea = {
+  id: string;
+  title: string;
+  source: "กระแสกำลังมา" | "คำค้นหายอดนิยม" | "ปัญหาที่คนดูเจอบ่อย";
+  insight: string;
+  platform: string;
+  searchIntent: string;
 };
 
 export type StoryboardFrame = {
@@ -41,6 +51,7 @@ const fallbackBrief: ContentBrief = {
   platform: "TikTok",
   length: "20 วินาที",
   tone: "เข้าใจง่าย",
+  topicCategory: "ไอเดียตามกระแส",
 };
 
 export function normalizeBrief(brief: Partial<ContentBrief>): ContentBrief {
@@ -50,6 +61,7 @@ export function normalizeBrief(brief: Partial<ContentBrief>): ContentBrief {
     platform: brief.platform?.trim() || fallbackBrief.platform,
     length: brief.length?.trim() || fallbackBrief.length,
     tone: brief.tone?.trim() || fallbackBrief.tone,
+    topicCategory: brief.topicCategory?.trim() || fallbackBrief.topicCategory,
   };
 }
 
@@ -86,6 +98,55 @@ export function generateContentOptions(briefInput: Partial<ContentBrief>): Conte
       brief,
     },
   ];
+}
+
+export function generateTopicIdeas(briefInput: Partial<ContentBrief>): TopicIdea[] {
+  const brief = normalizeBrief(briefInput);
+  const { audience, platform, tone, topicCategory } = brief;
+  const topicSeeds = [
+    {
+      source: "กระแสกำลังมา" as const,
+      title: `${topicCategory}: สิ่งที่ ${audience} ควรรู้บน ${platform}`,
+      insight: `โยงหมวด ${topicCategory} กับงานจริงของ ${audience} ให้ดูใกล้ตัว`,
+      searchIntent: topicCategory,
+    },
+    {
+      source: "คำค้นหายอดนิยม" as const,
+      title: `${audience} ค้นหาอะไรบ่อยในหมวด ${topicCategory}`,
+      insight: "หยิบคำถามตั้งต้นที่คนดูน่าจะค้นหามาเล่าแบบสั้นและตรง",
+      searchIntent: `คำถามเกี่ยวกับ ${topicCategory}`,
+    },
+    {
+      source: "ปัญหาที่คนดูเจอบ่อย" as const,
+      title: `3 ปัญหาเรื่อง ${topicCategory} ที่ ${audience} เจอบ่อย`,
+      insight: `เปิดด้วยปัญหาแรง แล้วให้ทางแก้ในโทน ${tone}`,
+      searchIntent: `แก้ปัญหา ${topicCategory}`,
+    },
+    {
+      source: "กระแสกำลังมา" as const,
+      title: `เทรนด์ ${topicCategory} บน ${platform} ที่ ${audience} เอาไปทำตามได้`,
+      insight: "จับสิ่งที่คนพูดถึงบ่อยให้กลายเป็นขั้นตอนที่ทำตามได้",
+      searchIntent: `เทรนด์ ${topicCategory}`,
+    },
+    {
+      source: "คำค้นหายอดนิยม" as const,
+      title: `วิธีเริ่ม ${topicCategory} แบบง่ายสำหรับ ${audience}`,
+      insight: "เน้นคำค้นหาที่คนเริ่มต้นมักใช้ และทำให้คำตอบจับต้องได้",
+      searchIntent: `เริ่ม ${topicCategory} ยังไง`,
+    },
+    {
+      source: "ปัญหาที่คนดูเจอบ่อย" as const,
+      title: `${audience} พลาดอะไรเวลาเล่าเรื่อง ${topicCategory} บน ${platform}`,
+      insight: "คอนเทนต์แนวเตือนข้อผิดพลาด มักทำให้คนกดดูและเซฟ",
+      searchIntent: `ข้อผิดพลาด ${topicCategory}`,
+    },
+  ];
+
+  return topicSeeds.map((idea, index) => ({
+    id: `topic-${index + 1}`,
+    platform,
+    ...idea,
+  }));
 }
 
 export function createStoryboard(option: ContentOption): StoryboardPack {
