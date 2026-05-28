@@ -4,5 +4,7 @@ dist/
 .vite-dev.pid
 output-*.png
 *.log
+assets/
+public/motion-drill-export/
 .env
 .env.*
