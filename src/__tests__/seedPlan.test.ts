@@ -14,4 +14,13 @@ describe("seedPlan", () => {
     const weekOneMotionDays = seedPlan.weeks[0].days.filter((day) => day.requiresMotion);
     expect(weekOneMotionDays.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("makes Week 2 a detailed CapCut shop content system", () => {
+    expect(seedPlan.weeks[1].theme).toBe("CapCut Shop Content System");
+    expect(seedPlan.weeks[1].days[0].title).toBe("ตั้งระบบโปรเจกต์ CapCut ประจำช่อง");
+    expect(seedPlan.weeks[1].days[3].full).toContain("CapCut สำหรับร้านเล็ก");
+
+    const weekTwoMotionDays = seedPlan.weeks[1].days.filter((day) => day.requiresMotion);
+    expect(weekTwoMotionDays.length).toBeGreaterThanOrEqual(2);
+  });
 });
