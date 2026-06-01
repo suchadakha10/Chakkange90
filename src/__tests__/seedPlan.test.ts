@@ -23,4 +23,19 @@ describe("seedPlan", () => {
     const weekTwoMotionDays = seedPlan.weeks[1].days.filter((day) => day.requiresMotion);
     expect(weekTwoMotionDays.length).toBeGreaterThanOrEqual(2);
   });
+
+  it("turns day 6 into filming day and makes the following days build from that footage", () => {
+    const missions = seedPlan.weeks.flatMap((week) => week.days);
+
+    expect(missions[5]).toMatchObject({
+      day: 6,
+      title: "วันถ่ายทำคลิปร้าน",
+      format: "talking-head",
+      requiresMotion: false,
+    });
+    expect(missions[5].full).toContain("ถ่าย raw clip");
+    expect(missions[6].full).toContain("ฟุตเทจที่ถ่ายเมื่อวาน");
+    expect(missions[7].full).toContain("ฟุตเทจที่ถ่ายไว้");
+    expect(missions[10].full).toContain("ฟุตเทจวันถ่ายทำ");
+  });
 });
