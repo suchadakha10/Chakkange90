@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { getElapsedChallengeDay } from "../domain/challengeDates";
 import {
   getCompletedDays,
   getCompletionPercent,
@@ -22,6 +23,10 @@ const proof = (day: number, proofType: ProofEntry["proofType"] = "post"): ProofE
 });
 
 describe("progress rules", () => {
+  it("treats June 3 as challenge day 12 when day 1 is May 23", () => {
+    expect(getElapsedChallengeDay("2026-05-23", new Date("2026-06-03T12:00:00"))).toBe(12);
+  });
+
   it("counts unique completed days", () => {
     expect(getCompletedDays([proof(1), proof(1, "hook"), proof(2)])).toBe(2);
   });

@@ -2,7 +2,7 @@ import type { ChallengeState } from "../domain/types";
 import { getCurrentChallengeDay } from "../domain/progress";
 
 const STORAGE_KEY = "challenge90.strictCoach.v1";
-const DEFAULT_START_DATE = "2026-05-27";
+const DEFAULT_START_DATE = "2026-05-23";
 
 function getStorage(): Storage | undefined {
   try {
@@ -42,7 +42,7 @@ export function loadChallengeState(): ChallengeState {
     const state = {
       ...defaults,
       ...parsed,
-      startDate: parsed.startDate === "2026-05-26" ? DEFAULT_START_DATE : parsed.startDate ?? defaults.startDate,
+      startDate: parsed.startDate === "2026-05-26" || parsed.startDate === "2026-05-27" ? DEFAULT_START_DATE : parsed.startDate ?? defaults.startDate,
       proofSync: { ...defaults.proofSync, ...parsed.proofSync },
       styleKit: { ...defaults.styleKit, ...parsed.styleKit },
     };

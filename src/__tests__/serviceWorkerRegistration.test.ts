@@ -43,6 +43,6 @@ describe("registerServiceWorker", () => {
   });
 
   it("uses a fresh production shell cache version for the latest deploy", () => {
-    expect(serviceWorker).toContain('CACHE_NAME = "strict-coach-shell-v2"');
+    expect(serviceWorker).toContain('CACHE_NAME = "strict-coach-shell-v3"');
   });
 });
