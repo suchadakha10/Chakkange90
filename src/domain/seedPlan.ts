@@ -91,14 +91,14 @@ const weekOne: Omit<DailyMission, "day" | "week">[] = [
 
 const weekTwo: Omit<DailyMission, "day" | "week">[] = [
   {
-    title: "ตั้งระบบโปรเจกต์ CapCut ประจำช่อง",
-    focus: "เอาฟุตเทจที่ถ่ายไว้เข้า template เพื่อเริ่มตัดคลิปใหม่ได้เร็ว",
+    title: "วันว่างเดินทางกลับบ้าน",
+    focus: "วันนี้เว้นงานผลิตคอนเทนต์หนักเพราะเดินทางกลับบ้านยาวถึงพรุ่งนี้ รักษาระบบด้วยการพักและบันทึกสถานะสั้น ๆ เท่านั้น",
     format: "practice",
     requiresMotion: false,
-    full: "สร้าง CapCut project template ที่มี canvas 9:16, intro 1 แบบ, subtitle style, logo/ชื่อช่อง, sound level, export setting และ import ฟุตเทจที่ถ่ายไว้เป็น bin พร้อมใช้",
-    minimum: "ตั้ง subtitle style กับ export setting ให้เสร็จ แล้ว import ฟุตเทจวันถ่ายทำอย่างน้อย 5 ไฟล์",
-    emergency: "เขียน checklist 5 ข้อของ project template และเลือกไฟล์ดิบ 3 ไฟล์ที่จะเริ่มตัด",
-    proofPrompt: "ใส่ screenshot project template, media bin, หรือโน้ต checklist พร้อมชื่อไฟล์ต้นแบบ",
+    full: "พักจากงานผลิตคอนเทนต์และเดินทางกลับบ้านให้ปลอดภัย ก่อนนอนบันทึกสถานะ 1 บรรทัดว่าออกเดินทาง/ถึงจุดพัก/ยังอยู่ระหว่างทาง",
+    minimum: "เขียนบันทึกเดินทาง 1 บรรทัดและพรุ่งนี้จะเริ่มงานเล็กสุดจากอะไร",
+    emergency: "พิมพ์แค่: วันนี้เดินทางกลับบ้าน งานหนักพักไว้ พรุ่งนี้กลับเข้าระบบ",
+    proofPrompt: "ใส่บันทึกสถานะการเดินทางสั้น ๆ เช่น ออกเดินทางแล้ว, ยังอยู่บนรถ, ถึงจุดพัก, หรือถึงบ้านแล้ว",
   },
   {
     title: "เติม B-roll ที่ยังขาด",
