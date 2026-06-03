@@ -17,7 +17,7 @@ describe("seedPlan", () => {
 
   it("makes Week 2 a detailed CapCut shop content system", () => {
     expect(seedPlan.weeks[1].theme).toBe("CapCut Shop Content System");
-    expect(seedPlan.weeks[1].days[0].title).toBe("ตั้งระบบโปรเจกต์ CapCut ประจำช่อง");
+    expect(seedPlan.weeks[1].days[0].title).toBe("วันว่างเดินทางกลับบ้าน");
     expect(seedPlan.weeks[1].days[3].full).toContain("CapCut สำหรับร้านเล็ก");
 
     const weekTwoMotionDays = seedPlan.weeks[1].days.filter((day) => day.requiresMotion);
@@ -35,7 +35,13 @@ describe("seedPlan", () => {
     });
     expect(missions[5].full).toContain("ถ่าย raw clip");
     expect(missions[6].full).toContain("ฟุตเทจที่ถ่ายเมื่อวาน");
-    expect(missions[7].full).toContain("ฟุตเทจที่ถ่ายไว้");
+    expect(missions[7]).toMatchObject({
+      day: 8,
+      title: "วันว่างเดินทางกลับบ้าน",
+      format: "practice",
+      requiresMotion: false,
+    });
+    expect(missions[7].full).toContain("เดินทางกลับบ้าน");
     expect(missions[10].full).toContain("ฟุตเทจวันถ่ายทำ");
   });
 });
