@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { readFileSync } from "node:fs";
 import { registerServiceWorker } from "../registerServiceWorker";
 
 describe("registerServiceWorker", () => {
@@ -39,5 +40,11 @@ describe("registerServiceWorker", () => {
     });
 
     expect(register).toHaveBeenCalledWith("/Chakkange90/sw.js");
+  });
+
+  it("uses a fresh production shell cache version for the latest deploy", () => {
+    const serviceWorker = readFileSync("public/sw.js", "utf8");
+
+    expect(serviceWorker).toContain('CACHE_NAME = "strict-coach-shell-v2"');
   });
 });
