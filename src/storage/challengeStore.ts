@@ -31,6 +31,11 @@ export function createDefaultState(): ChallengeState {
   };
 }
 
+export function getTodayDateInputValue(today: Date = new Date()): string {
+  const localDate = new Date(today.getTime() - today.getTimezoneOffset() * 60 * 1000);
+  return localDate.toISOString().slice(0, 10);
+}
+
 export function loadChallengeState(): ChallengeState {
   const defaults = createDefaultState();
   const storage = getStorage();
@@ -60,4 +65,16 @@ export function resetChallengeState(): ChallengeState {
   const state = createDefaultState();
   saveChallengeState(state);
   return state;
+}
+
+export function restartChallengeStateFromToday(state: ChallengeState, today: Date = new Date()): ChallengeState {
+  const nextState = {
+    ...state,
+    startDate: getTodayDateInputValue(today),
+    currentDay: 1,
+    proofs: [],
+    weeklyReviews: [],
+  };
+  saveChallengeState(nextState);
+  return nextState;
 }

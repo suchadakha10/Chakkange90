@@ -15,7 +15,10 @@ const proof = (day: number): ProofEntry => ({
   createdAt: "2026-05-27T00:00:00.000Z",
 });
 
-afterEach(() => cleanup());
+afterEach(() => {
+  vi.useRealTimers();
+  cleanup();
+});
 
 describe("Settings", () => {
   it("updates the Day 1 start date without clearing existing proof data", () => {
@@ -30,6 +33,48 @@ describe("Settings", () => {
     expect(onChange.mock.calls[0][0]).toMatchObject({
       startDate: "2026-05-27",
       proofs: [proof(1)],
+    });
+  });
+
+  it("restarts the challenge from today while keeping personal settings", () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-06-07T09:00:00+07:00"));
+    const onChange = vi.fn();
+    const state: ChallengeState = {
+      ...createDefaultState(),
+      startDate: "2026-05-23",
+      currentDay: 9,
+      proofs: [proof(1), proof(2)],
+      weeklyReviews: [
+        {
+          week: 1,
+          completedDays: 2,
+          postsPublished: 1,
+          motionDrills: 0,
+          bestSignal: "Hook questions",
+          avoided: "Editing",
+          adjustment: "Make the task smaller",
+          createdAt: "2026-06-06T00:00:00.000Z",
+        },
+      ],
+      proofSync: {
+        scriptUrl: "https://script.google.com/macros/s/example/exec",
+        secret: "keep-this",
+      },
+    };
+
+    render(<Settings state={state} onChange={onChange} />);
+
+    fireEvent.click(screen.getByRole("button", { name: "Restart from today" }));
+
+    expect(onChange).toHaveBeenCalledTimes(1);
+    expect(onChange.mock.calls[0][0]).toMatchObject({
+      startDate: "2026-06-07",
+      currentDay: 1,
+      proofs: [],
+      weeklyReviews: [],
+      proofSync: state.proofSync,
+      styleKit: state.styleKit,
     });
   });
 });

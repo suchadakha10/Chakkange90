@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { getCurrentChallengeDay } from "../domain/progress";
 import type { ChallengeState } from "../domain/types";
-import { resetChallengeState } from "../storage/challengeStore";
+import { resetChallengeState, restartChallengeStateFromToday } from "../storage/challengeStore";
 import { isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "../sync/proofSync";
 
 export function Settings({ state, onChange }: { state: ChallengeState; onChange: (state: ChallengeState) => void }) {
@@ -87,6 +87,9 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
         <p>{state.styleKit.layoutRule}</p>
       </section>
       <section className="panel">
+        <button className="secondary-action" onClick={() => onChange(restartChallengeStateFromToday(state))} type="button">
+          Restart from today
+        </button>
         <button className="secondary-action danger" onClick={() => onChange(resetChallengeState())} type="button">
           รีเซ็ตข้อมูล challenge
         </button>
