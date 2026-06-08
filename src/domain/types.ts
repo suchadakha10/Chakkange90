@@ -15,6 +15,17 @@ export interface DailyMission {
   proofPrompt: string;
 }
 
+export interface MissionOverride {
+  day: number;
+  title: string;
+  focus: string;
+  full: string;
+  minimum: string;
+  emergency: string;
+  proofPrompt: string;
+  updatedAt: string;
+}
+
 export interface ChallengeWeek {
   week: number;
   theme: string;
@@ -53,6 +64,7 @@ export interface WeeklyReviewEntry {
 export interface ChallengeState {
   startDate: string;
   currentDay: number;
+  missionOverrides: Record<string, MissionOverride>;
   proofs: ProofEntry[];
   weeklyReviews: WeeklyReviewEntry[];
   emergencyLimitPerWeek: number;

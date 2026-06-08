@@ -1,5 +1,6 @@
 const SECRET = "CHANGE_ME_SECRET";
 const SHEET_NAME = "proofs";
+const MISSION_OVERRIDE_SHEET_NAME = "mission_overrides";
 const HEADERS = [
   "id",
   "day",
@@ -11,6 +12,16 @@ const HEADERS = [
   "createdAt",
   "downgradedFrom",
   "downgradeReason",
+];
+const MISSION_OVERRIDE_HEADERS = [
+  "day",
+  "title",
+  "focus",
+  "full",
+  "minimum",
+  "emergency",
+  "proofPrompt",
+  "updatedAt",
 ];
 
 function jsonOutput(payload) {
@@ -34,6 +45,43 @@ function getProofSheet() {
   return sheet;
 }
 
+function getMissionOverrideSheet() {
+  const spreadsheet = SpreadsheetApp.getActiveSpreadsheet();
+  let sheet = spreadsheet.getSheetByName(MISSION_OVERRIDE_SHEET_NAME);
+
+  if (!sheet) {
+    sheet = spreadsheet.insertSheet(MISSION_OVERRIDE_SHEET_NAME);
+  }
+
+  const firstRow = sheet.getRange(1, 1, 1, MISSION_OVERRIDE_HEADERS.length).getValues()[0];
+  if (firstRow[0] !== "day") {
+    sheet.clear();
+    sheet.appendRow(MISSION_OVERRIDE_HEADERS);
+  }
+
+  return sheet;
+}
+
+function rowsToObjects(sheet, headers) {
+  const values = sheet.getDataRange().getValues();
+  const rows = [];
+
+  for (let rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+    const row = values[rowIndex];
+    if (!row[0]) continue;
+
+    const item = {};
+    for (let columnIndex = 0; columnIndex < headers.length; columnIndex += 1) {
+      const key = headers[columnIndex];
+      const value = row[columnIndex];
+      if (value !== "") item[key] = value;
+    }
+    rows.push(item);
+  }
+
+  return rows;
+}
+
 function checkSecret(secret) {
   if (secret !== SECRET) {
     throw new Error("Invalid secret");
@@ -45,28 +93,15 @@ function doGet(e) {
     const params = e && e.parameter ? e.parameter : {};
     checkSecret(params.secret);
 
-    if (params.action !== "proofs") {
-      return jsonOutput({ ok: false, error: "Unknown action" });
+    if (params.action === "proofs") {
+      return jsonOutput({ ok: true, proofs: rowsToObjects(getProofSheet(), HEADERS) });
     }
 
-    const sheet = getProofSheet();
-    const values = sheet.getDataRange().getValues();
-    const proofs = [];
-
-    for (let rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
-      const row = values[rowIndex];
-      if (!row[0]) continue;
-
-      const proof = {};
-      for (let columnIndex = 0; columnIndex < HEADERS.length; columnIndex += 1) {
-        const key = HEADERS[columnIndex];
-        const value = row[columnIndex];
-        if (value !== "") proof[key] = value;
-      }
-      proofs.push(proof);
+    if (params.action === "missionOverrides") {
+      return jsonOutput({ ok: true, missionOverrides: rowsToObjects(getMissionOverrideSheet(), MISSION_OVERRIDE_HEADERS) });
     }
 
-    return jsonOutput({ ok: true, proofs });
+    return jsonOutput({ ok: false, error: "Unknown action" });
   } catch (error) {
     return jsonOutput({ ok: false, error: String(error && error.message ? error.message : error) });
   }
@@ -94,6 +129,47 @@ function doPost(e) {
         }
       }
 
+      return jsonOutput({ ok: true });
+    }
+
+    if (payload.action === "deleteMissionOverride") {
+      const day = Number(payload.day);
+      if (!day) {
+        return jsonOutput({ ok: false, error: "Missing day" });
+      }
+
+      const sheet = getMissionOverrideSheet();
+      const values = sheet.getDataRange().getValues();
+
+      for (let rowIndex = values.length - 1; rowIndex >= 1; rowIndex -= 1) {
+        if (Number(values[rowIndex][0]) === day) {
+          sheet.deleteRow(rowIndex + 1);
+          return jsonOutput({ ok: true });
+        }
+      }
+
+      return jsonOutput({ ok: true });
+    }
+
+    if (payload.action === "saveMissionOverride") {
+      const missionOverride = payload.missionOverride;
+      if (!missionOverride || !missionOverride.day) {
+        return jsonOutput({ ok: false, error: "Missing missionOverride" });
+      }
+
+      const sheet = getMissionOverrideSheet();
+      const values = sheet.getDataRange().getValues();
+      const day = Number(missionOverride.day);
+      const row = MISSION_OVERRIDE_HEADERS.map((key) => missionOverride[key] || "");
+
+      for (let rowIndex = 1; rowIndex < values.length; rowIndex += 1) {
+        if (Number(values[rowIndex][0]) === day) {
+          sheet.getRange(rowIndex + 1, 1, 1, MISSION_OVERRIDE_HEADERS.length).setValues([row]);
+          return jsonOutput({ ok: true });
+        }
+      }
+
+      sheet.appendRow(row);
       return jsonOutput({ ok: true });
     }
 

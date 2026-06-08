@@ -2,7 +2,7 @@ import { useState } from "react";
 import { getCurrentChallengeDay } from "../domain/progress";
 import type { ChallengeState } from "../domain/types";
 import { resetChallengeState, restartChallengeStateFromToday } from "../storage/challengeStore";
-import { isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "../sync/proofSync";
+import { isProofSyncConfigured, pullMissionOverrides, pullProofs, replaceProofsFromRemote } from "../sync/proofSync";
 
 export function Settings({ state, onChange }: { state: ChallengeState; onChange: (state: ChallengeState) => void }) {
   const [syncMessage, setSyncMessage] = useState("");
@@ -15,16 +15,17 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
     }
 
     try {
-      setSyncMessage("กำลังโหลด proof จาก Google Sheet...");
-      const remoteProofs = await pullProofs(state.proofSync);
+      setSyncMessage("กำลังโหลด proof และภารกิจจาก Google Sheet...");
+      const [remoteProofs, remoteMissionOverrides] = await Promise.all([pullProofs(state.proofSync), pullMissionOverrides(state.proofSync)]);
       const nextState = {
         ...state,
         proofs: replaceProofsFromRemote(remoteProofs),
+        missionOverrides: remoteMissionOverrides,
         currentDay: getCurrentChallengeDay(remoteProofs, state.startDate),
         proofSync: { ...state.proofSync, lastSyncedAt: new Date().toISOString() },
       };
       onChange(nextState);
-      setSyncMessage(`sync แล้ว: พบ proof ทั้งหมด ${nextState.proofs.length} รายการ`);
+      setSyncMessage(`sync แล้ว: พบ proof ${nextState.proofs.length} รายการ และภารกิจที่แก้ ${Object.keys(nextState.missionOverrides).length} วัน`);
     } catch (error) {
       setSyncMessage(error instanceof Error ? error.message : "sync ไม่สำเร็จ");
     }
@@ -55,8 +56,8 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
         <p>โควตา Emergency: {state.emergencyLimitPerWeek} ครั้ง / สัปดาห์</p>
       </section>
       <section className="panel">
-        <h3>Google Sheet Proof Sync</h3>
-        <p className="muted">ใช้ Google Apps Script เป็นตัวกลาง ข้อมูล proof จะ sync ข้ามมือถือและคอมได้</p>
+        <h3>Google Sheet Sync</h3>
+        <p className="muted">ใช้ Google Apps Script เป็นตัวกลาง ข้อมูล proof และภารกิจที่แก้จะ sync ข้ามมือถือและคอมได้</p>
         <input
           value={state.proofSync.scriptUrl}
           onChange={(event) => onChange({ ...state, proofSync: { ...state.proofSync, scriptUrl: event.target.value } })}
@@ -70,7 +71,7 @@ export function Settings({ state, onChange }: { state: ChallengeState; onChange:
         />
         <div className="action-row">
           <button className="primary-action" disabled={!syncConfigured} onClick={syncProofsNow} type="button">
-            โหลด proof จาก Google Sheet
+            โหลด proof + ภารกิจจาก Google Sheet
           </button>
         </div>
         {state.proofSync.lastSyncedAt && <p className="muted">sync ล่าสุด: {new Date(state.proofSync.lastSyncedAt).toLocaleString("th-TH")}</p>}

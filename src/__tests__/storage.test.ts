@@ -21,6 +21,7 @@ describe("challengeStore", () => {
     const state = createDefaultState();
     expect(state.startDate).toBe("2026-05-23");
     expect(state.currentDay).toBe(1);
+    expect(state.missionOverrides).toEqual({});
     expect(state.proofSync).toEqual({ scriptUrl: "", secret: "" });
     expect(state.styleKit.palette).toEqual(["#ffdd00", "#00c2ff", "#ff4fa3", "#111111", "#f7f7f2"]);
   });

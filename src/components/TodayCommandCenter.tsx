@@ -1,8 +1,8 @@
-import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, Flame, Send } from "lucide-react";
-import { useState } from "react";
+import { AlertTriangle, CheckCircle2, ChevronDown, ChevronUp, Flame, Pencil, RotateCcw, Save, Send } from "lucide-react";
+import { useEffect, useState } from "react";
 import { formatChallengeDate } from "../domain/challengeDates";
 import { getCurrentChallengeDay, getEmergencyCountThisWeek, getMotionDrillsThisWeek, getStreak, getWeekForDay, shouldWarnMotionAvoidance } from "../domain/progress";
-import type { ChallengeState, DailyMission, ProofEntry, TaskLevel } from "../domain/types";
+import type { ChallengeState, DailyMission, MissionOverride, ProofEntry, TaskLevel } from "../domain/types";
 import { isProofSyncConfigured, pushProof } from "../sync/proofSync";
 
 interface Props {
@@ -10,6 +10,8 @@ interface Props {
   tomorrowMission?: DailyMission;
   state: ChallengeState;
   onChange: (state: ChallengeState) => void;
+  onSaveMissionOverride?: (missionOverride: MissionOverride) => void | Promise<void>;
+  onResetMissionOverride?: (day: number) => void | Promise<void>;
 }
 
 function proofTypeFor(mission: DailyMission, level: TaskLevel): ProofEntry["proofType"] {
@@ -20,7 +22,7 @@ function proofTypeFor(mission: DailyMission, level: TaskLevel): ProofEntry["proo
   return "draft";
 }
 
-export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }: Props) {
+export function TodayCommandCenter({ mission, tomorrowMission, state, onChange, onSaveMissionOverride, onResetMissionOverride }: Props) {
   const [level, setLevel] = useState<TaskLevel>("full");
   const [title, setTitle] = useState("");
   const [notes, setNotes] = useState("");
@@ -28,6 +30,15 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const [reason, setReason] = useState("");
   const [syncMessage, setSyncMessage] = useState("");
   const [tomorrowExpanded, setTomorrowExpanded] = useState(false);
+  const [isEditingMission, setIsEditingMission] = useState(false);
+  const [missionDraft, setMissionDraft] = useState({
+    title: mission.title,
+    focus: mission.focus,
+    full: mission.full,
+    minimum: mission.minimum,
+    emergency: mission.emergency,
+    proofPrompt: mission.proofPrompt,
+  });
   const week = getWeekForDay(state.currentDay);
   const streak = getStreak(state.proofs, state.currentDay);
   const emergencyCount = getEmergencyCountThisWeek(state.proofs, week);
@@ -36,8 +47,48 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
   const selectedTask = mission[level];
   const dayDone = state.proofs.some((proof) => proof.day === mission.day);
   const canSubmit = title.trim().length > 0 && notes.trim().length > 0;
+  const canSaveMission = Object.values(missionDraft).every((value) => value.trim().length > 0);
   const todayDate = formatChallengeDate(state.startDate, mission.day);
   const tomorrowDate = tomorrowMission ? formatChallengeDate(state.startDate, tomorrowMission.day) : "";
+  const hasMissionOverride = Boolean(state.missionOverrides[String(mission.day)]);
+
+  useEffect(() => {
+    setMissionDraft({
+      title: mission.title,
+      focus: mission.focus,
+      full: mission.full,
+      minimum: mission.minimum,
+      emergency: mission.emergency,
+      proofPrompt: mission.proofPrompt,
+    });
+    setIsEditingMission(false);
+  }, [mission.day, mission.title, mission.focus, mission.full, mission.minimum, mission.emergency, mission.proofPrompt]);
+
+  function updateMissionDraft(field: keyof typeof missionDraft, value: string) {
+    setMissionDraft((currentDraft) => ({ ...currentDraft, [field]: value }));
+  }
+
+  async function saveMissionDraft() {
+    if (!canSaveMission || !onSaveMissionOverride) return;
+
+    await onSaveMissionOverride({
+      day: mission.day,
+      title: missionDraft.title.trim(),
+      focus: missionDraft.focus.trim(),
+      full: missionDraft.full.trim(),
+      minimum: missionDraft.minimum.trim(),
+      emergency: missionDraft.emergency.trim(),
+      proofPrompt: missionDraft.proofPrompt.trim(),
+      updatedAt: new Date().toISOString(),
+    });
+    setIsEditingMission(false);
+  }
+
+  async function resetMissionOverride() {
+    if (!onResetMissionOverride) return;
+    await onResetMissionOverride(mission.day);
+    setIsEditingMission(false);
+  }
 
   async function submitProof() {
     if (!canSubmit) return;
@@ -110,12 +161,59 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
       <section className="panel today-mission-panel">
         <div className="panel-heading">
           <h3>ภารกิจวันนี้</h3>
-          {dayDone && (
-            <span className="done-pill">
-              <CheckCircle2 size={16} /> ส่งหลักฐานแล้ว
-            </span>
-          )}
+          <div className="mission-actions">
+            {dayDone && (
+              <span className="done-pill">
+                <CheckCircle2 size={16} /> ส่งหลักฐานแล้ว
+              </span>
+            )}
+            {onSaveMissionOverride && (
+              <button aria-label="Edit today's mission" className="secondary-action compact-action" onClick={() => setIsEditingMission((isEditing) => !isEditing)} type="button">
+                <Pencil size={16} /> แก้ไขภารกิจวันนี้
+              </button>
+            )}
+          </div>
         </div>
+        {isEditingMission && (
+          <div className="mission-editor">
+            <label className="field-label">
+              ชื่อภารกิจ
+              <input aria-label="Mission title" value={missionDraft.title} onChange={(event) => updateMissionDraft("title", event.target.value)} />
+            </label>
+            <label className="field-label">
+              โฟกัส
+              <textarea aria-label="Mission focus" value={missionDraft.focus} onChange={(event) => updateMissionDraft("focus", event.target.value)} rows={2} />
+            </label>
+            <div className="mission-editor-grid">
+              <label className="field-label">
+                FULL
+                <textarea aria-label="FULL" value={missionDraft.full} onChange={(event) => updateMissionDraft("full", event.target.value)} rows={3} />
+              </label>
+              <label className="field-label">
+                MINIMUM
+                <textarea aria-label="MINIMUM" value={missionDraft.minimum} onChange={(event) => updateMissionDraft("minimum", event.target.value)} rows={3} />
+              </label>
+              <label className="field-label">
+                EMERGENCY
+                <textarea aria-label="EMERGENCY" value={missionDraft.emergency} onChange={(event) => updateMissionDraft("emergency", event.target.value)} rows={3} />
+              </label>
+            </div>
+            <label className="field-label">
+              Proof prompt
+              <textarea aria-label="Proof prompt" value={missionDraft.proofPrompt} onChange={(event) => updateMissionDraft("proofPrompt", event.target.value)} rows={2} />
+            </label>
+            <div className="action-row">
+              <button aria-label="Save mission" className="primary-action" disabled={!canSaveMission} onClick={saveMissionDraft} type="button">
+                <Save size={16} /> บันทึกภารกิจ
+              </button>
+              {hasMissionOverride && (
+                <button aria-label="Reset mission" className="secondary-action" onClick={resetMissionOverride} type="button">
+                  <RotateCcw size={16} /> คืนค่าเดิม
+                </button>
+              )}
+            </div>
+          </div>
+        )}
         <div className="level-grid">
           {(["full", "minimum", "emergency"] as const).map((taskLevel) => (
             <button
@@ -146,6 +244,7 @@ export function TodayCommandCenter({ mission, tomorrowMission, state, onChange }
               {tomorrowMission.requiresMotion && <span className="tag">Motion</span>}
               <button
                 aria-expanded={tomorrowExpanded}
+                aria-label={tomorrowExpanded ? "Collapse tomorrow mission" : "Expand tomorrow mission"}
                 className="icon-toggle"
                 onClick={() => setTomorrowExpanded((isExpanded) => !isExpanded)}
                 title={tomorrowExpanded ? "ย่องานพรุ่งนี้" : "ขยายงานพรุ่งนี้"}

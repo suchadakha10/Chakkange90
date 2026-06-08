@@ -24,13 +24,12 @@ describe("TodayCommandCenter", () => {
 
     render(<TodayCommandCenter mission={mission(1, "Today task")} tomorrowMission={mission(2, "Tomorrow task")} state={state} onChange={vi.fn()} />);
 
-    expect(screen.getByText("พรุ่งนี้")).toBeInTheDocument();
-    expect(screen.getByRole("heading", { name: "วันที่ 2: Tomorrow task" })).toBeInTheDocument();
+    expect(screen.getByRole("heading", { name: /Tomorrow task/ })).toBeInTheDocument();
     expect(screen.getByText("23 พ.ค. 2026")).toBeInTheDocument();
     expect(screen.getByText("24 พ.ค. 2026")).toBeInTheDocument();
     expect(screen.queryByText("Tomorrow task focus")).not.toBeInTheDocument();
     expect(screen.queryByText("Tomorrow task full task")).not.toBeInTheDocument();
-    fireEvent.click(screen.getByRole("button", { name: "ขยายงานพรุ่งนี้" }));
+    fireEvent.click(screen.getByRole("button", { name: "Expand tomorrow mission" }));
     expect(screen.getByText("Tomorrow task focus")).toBeInTheDocument();
     expect(screen.getByText("Tomorrow task full task")).toBeInTheDocument();
     expect(screen.queryByText("ส่งหลักฐานแล้ว")).not.toBeInTheDocument();
@@ -42,5 +41,34 @@ describe("TodayCommandCenter", () => {
     render(<TodayCommandCenter mission={mission(1, "Today task")} tomorrowMission={mission(2, "Tomorrow task")} state={state} onChange={vi.fn()} />);
 
     expect(screen.queryByRole("button", { name: "ไปวันถัดไป" })).not.toBeInTheDocument();
+  });
+
+  it("lets the user edit and save today's system mission", () => {
+    const onSaveMissionOverride = vi.fn();
+    const state: ChallengeState = { ...createDefaultState(), currentDay: 1 };
+
+    render(
+      <TodayCommandCenter
+        mission={mission(1, "Today task")}
+        tomorrowMission={mission(2, "Tomorrow task")}
+        state={state}
+        onChange={vi.fn()}
+        onSaveMissionOverride={onSaveMissionOverride}
+      />,
+    );
+
+    fireEvent.click(screen.getByRole("button", { name: "Edit today's mission" }));
+    fireEvent.change(screen.getByLabelText("Mission title"), { target: { value: "ภารกิจที่แก้เอง" } });
+    fireEvent.change(screen.getByLabelText("FULL"), { target: { value: "งานแบบเต็มที่แก้เอง" } });
+    fireEvent.click(screen.getByRole("button", { name: "Save mission" }));
+
+    expect(onSaveMissionOverride).toHaveBeenCalledWith(
+      expect.objectContaining({
+        day: 1,
+        title: "ภารกิจที่แก้เอง",
+        full: "งานแบบเต็มที่แก้เอง",
+        updatedAt: expect.any(String),
+      }),
+    );
   });
 });

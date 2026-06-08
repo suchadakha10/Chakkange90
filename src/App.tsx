@@ -7,11 +7,12 @@ import { ProofVault } from "./components/ProofVault";
 import { Settings } from "./components/Settings";
 import { TodayCommandCenter } from "./components/TodayCommandCenter";
 import { WeeklyReview } from "./components/WeeklyReview";
+import { planWithMissionOverrides } from "./domain/missionOverrides";
 import { seedPlan } from "./domain/seedPlan";
-import type { ChallengeState } from "./domain/types";
+import type { ChallengeState, MissionOverride } from "./domain/types";
 import { getCurrentChallengeDay } from "./domain/progress";
 import { loadChallengeState, saveChallengeState } from "./storage/challengeStore";
-import { deleteProof, isProofSyncConfigured, pullProofs, replaceProofsFromRemote } from "./sync/proofSync";
+import { deleteMissionOverride, deleteProof, isProofSyncConfigured, pullMissionOverrides, pullProofs, pushMissionOverride, replaceProofsFromRemote } from "./sync/proofSync";
 
 const tabs = ["วันนี้", "Confidence", "ตาราง 90 วัน", "Motion", "Content Studio", "หลักฐาน", "รีวิว", "ตั้งค่า"] as const;
 type Tab = (typeof tabs)[number];
@@ -28,12 +29,13 @@ export default function App() {
     if (!isProofSyncConfigured(state.proofSync)) return;
 
     let isCancelled = false;
-    pullProofs(state.proofSync)
-      .then((remoteProofs) => {
+    Promise.all([pullProofs(state.proofSync), pullMissionOverrides(state.proofSync)])
+      .then(([remoteProofs, remoteMissionOverrides]) => {
         if (isCancelled) return;
         setState((currentState) => ({
           ...currentState,
           proofs: replaceProofsFromRemote(remoteProofs),
+          missionOverrides: remoteMissionOverrides,
           currentDay: getCurrentChallengeDay(remoteProofs, currentState.startDate),
           proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
         }));
@@ -47,9 +49,55 @@ export default function App() {
     };
   }, [state.proofSync.scriptUrl, state.proofSync.secret]);
 
-  const missions = useMemo(() => seedPlan.weeks.flatMap((week) => week.days), []);
+  const plan = useMemo(() => planWithMissionOverrides(seedPlan, state.missionOverrides), [state.missionOverrides]);
+  const missions = useMemo(() => plan.weeks.flatMap((week) => week.days), [plan]);
   const todayMission = useMemo(() => missions.find((day) => day.day === state.currentDay) ?? missions[0], [missions, state.currentDay]);
   const tomorrowMission = useMemo(() => missions.find((day) => day.day === state.currentDay + 1), [missions, state.currentDay]);
+
+  async function handleSaveMissionOverride(missionOverride: MissionOverride) {
+    setState((currentState) => ({
+      ...currentState,
+      missionOverrides: {
+        ...currentState.missionOverrides,
+        [String(missionOverride.day)]: missionOverride,
+      },
+    }));
+
+    if (!isProofSyncConfigured(state.proofSync)) return;
+
+    try {
+      await pushMissionOverride(state.proofSync, missionOverride);
+      setState((currentState) => ({
+        ...currentState,
+        proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
+      }));
+    } catch {
+      // Keep the local edit available even if the sync endpoint is temporarily unreachable.
+    }
+  }
+
+  async function handleResetMissionOverride(day: number) {
+    setState((currentState) => {
+      const nextMissionOverrides = { ...currentState.missionOverrides };
+      delete nextMissionOverrides[String(day)];
+      return {
+        ...currentState,
+        missionOverrides: nextMissionOverrides,
+      };
+    });
+
+    if (!isProofSyncConfigured(state.proofSync)) return;
+
+    try {
+      await deleteMissionOverride(state.proofSync, day);
+      setState((currentState) => ({
+        ...currentState,
+        proofSync: { ...currentState.proofSync, lastSyncedAt: new Date().toISOString() },
+      }));
+    } catch {
+      // Keep the local reset applied even if the remote sheet is temporarily unreachable.
+    }
+  }
 
   async function handleDeleteProof(proofId: string) {
     setState((currentState) => {
@@ -89,9 +137,18 @@ export default function App() {
         </nav>
       </aside>
       <section className="workspace">
-        {activeTab === "วันนี้" && <TodayCommandCenter mission={todayMission} tomorrowMission={tomorrowMission} state={state} onChange={setState} />}
+        {activeTab === "วันนี้" && (
+          <TodayCommandCenter
+            mission={todayMission}
+            tomorrowMission={tomorrowMission}
+            state={state}
+            onChange={setState}
+            onSaveMissionOverride={handleSaveMissionOverride}
+            onResetMissionOverride={handleResetMissionOverride}
+          />
+        )}
         {activeTab === "Confidence" && <ConfidenceCenter currentMission={todayMission} state={state} onChange={setState} />}
-        {activeTab === "ตาราง 90 วัน" && <PlanView plan={seedPlan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
+        {activeTab === "ตาราง 90 วัน" && <PlanView plan={plan} proofs={state.proofs} currentDay={state.currentDay} startDate={state.startDate} />}
         {activeTab === "Motion" && <MotionTrack state={state} />}
         {activeTab === "Content Studio" && <ContentStudio />}
         {activeTab === "หลักฐาน" && <ProofVault proofs={state.proofs} onDeleteProof={(proof) => handleDeleteProof(proof.id)} />}

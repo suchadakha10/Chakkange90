@@ -248,6 +248,33 @@ textarea {
   gap: 8px;
 }
 
+.mission-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.compact-action {
+  min-height: 36px;
+  padding: 8px 10px;
+}
+
+.mission-editor {
+  border-top: 1px solid #30303c;
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+  padding-top: 14px;
+}
+
+.mission-editor-grid {
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 1fr;
+}
+
 .icon-toggle {
   align-items: center;
   aspect-ratio: 1;
@@ -877,6 +904,10 @@ textarea::placeholder {
   }
 
   .tomorrow-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .mission-editor-grid {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 

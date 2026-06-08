@@ -16,6 +16,7 @@ export function createDefaultState(): ChallengeState {
   return {
     startDate: DEFAULT_START_DATE,
     currentDay: 1,
+    missionOverrides: {},
     proofs: [],
     weeklyReviews: [],
     emergencyLimitPerWeek: 2,
@@ -48,6 +49,7 @@ export function loadChallengeState(): ChallengeState {
       ...defaults,
       ...parsed,
       startDate: parsed.startDate === "2026-05-26" || parsed.startDate === "2026-05-27" ? DEFAULT_START_DATE : parsed.startDate ?? defaults.startDate,
+      missionOverrides: parsed.missionOverrides ?? defaults.missionOverrides,
       proofSync: { ...defaults.proofSync, ...parsed.proofSync },
       styleKit: { ...defaults.styleKit, ...parsed.styleKit },
     };
